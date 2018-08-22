@@ -910,12 +910,12 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	Step 2: Perform the tentative Euler integration step.
 	*********************************************************************/
 	
-	/* Set up the Euler step integration frame buffer: 
+	/* Set up the Euler step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);
-	glViewport(0,0,size[0],size[1]);*/
+	glViewport(0,0,size[0],size[1]);
 	
-	/* Set up the Euler integration step shader: 
+	/* Set up the Euler integration step shader: */
 	glUseProgramObjectARB(dataItem->eulerStepShader);
 	glUniformARB(dataItem->eulerStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->eulerStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
@@ -925,15 +925,14 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
-	*/
-	/* Run the Euler integration step: 
+	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
 	glVertex2i(size[0],0);
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
 	glEnd();
-	*/
+	
 	/*********************************************************************
 	Step 3: Calculate temporal derivative of intermediate quantities.
 	********************************************************************
