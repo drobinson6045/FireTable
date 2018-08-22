@@ -892,6 +892,7 @@ void WaterTable2::setWaterLevel(const GLfloat* waterGrid,GLContextData& contextD
 
 GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& contextData) const
 	{
+	//REVERTED
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
