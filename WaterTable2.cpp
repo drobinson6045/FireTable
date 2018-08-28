@@ -936,20 +936,19 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/*********************************************************************
 	Step 3: Calculate temporal derivative of intermediate quantities.
-	********************************************************************
+	*********************************************************************/
 	
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[2],false);
-	*/
+	
 	/*********************************************************************
 	Step 4: Perform the final Runge-Kutta integration step.
 	*********************************************************************/
 	
-	/* Set up the Runge-Kutta step integration frame buffer: 
+	/* Set up the Runge-Kutta step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
 	glViewport(0,0,size[0],size[1]);
-	*/
-	/* Set up the Runge-Kutta integration step shader: 
+	/* Set up the Runge-Kutta integration step shader: */
 	glUseProgramObjectARB(dataItem->rungeKuttaStepShader);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
@@ -962,15 +961,13 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);
-	*/
-	/* Run the Runge-Kutta integration step: 
+	/* Run the Runge-Kutta integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
 	glVertex2i(size[0],0);
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
 	glEnd();
-	*/
 	if(dryBoundary)
 		{
 		/* Set up the boundary condition shader to enforce dry boundaries: */
@@ -990,9 +987,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		//glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 		}
 	
-	/* Update the current quantities: 
+	/* Update the current quantities: */
 	dataItem->currentQuantity=1-dataItem->currentQuantity;
-	*/
 	if(waterDeposit!=0.0f||!renderFunctions.empty())
 		{
 		/* Save OpenGL state: */
@@ -1036,12 +1032,11 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		Step 6: Update the conserved quantities based on the water texture.
 		*******************************************************************/
 		
-		/* Set up the integration frame buffer to update the conserved quantities based on the water texture: 
+		/* Set up the integration frame buffer to update the conserved quantities based on the water texture: */
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
 		glViewport(0,0,size[0],size[1]);
-		*/
-		/* Set up the water update shader: 
+		/* Set up the water update shader: */
 		glUseProgramObjectARB(dataItem->waterShader);
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
@@ -1052,18 +1047,16 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		glActiveTextureARB(GL_TEXTURE2_ARB);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->waterTextureObject);
 		glUniform1iARB(dataItem->waterShaderUniformLocations[2],2);
-		*/
-		/* Run the water update: 
+		/* Run the water update: */
 		glBegin(GL_QUADS);
 		glVertex2i(0,0);
 		glVertex2i(size[0],0);
 		glVertex2i(size[0],size[1]);
 		glVertex2i(0,size[1]);
 		glEnd();
-		*/
-		/* Update the current quantities: 
+		/* Update the current quantities: */
 		dataItem->currentQuantity=1-dataItem->currentQuantity;
-                */
+                
 		}
 	
 	/* Unbind all shaders and textures: */

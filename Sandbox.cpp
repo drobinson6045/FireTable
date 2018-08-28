@@ -1346,16 +1346,14 @@ void Sandbox::display(GLContextData& contextData) const
 		/* Run the water flow simulation's main pass: */
 		GLfloat totalTimeStep=GLfloat(Vrui::getFrameTime()*waterSpeed);
 		unsigned int numSteps=0;
-                /*  STOPWATER
 		while(numSteps<waterMaxSteps-1U&&totalTimeStep>1.0e-8f)
 			{
-			/* Run with a self-determined time step to maintain stability: 
+			/* Run with a self-determined time step to maintain stability: */
 			waterTable->setMaxStepSize(totalTimeStep);
 			GLfloat timeStep=waterTable->runSimulationStep(false,contextData);
 			totalTimeStep-=timeStep;
 			++numSteps;
 			}
-                */  //STOPWATER
 		#if 0
 		if(totalTimeStep>1.0e-8f)
 			{
@@ -1367,10 +1365,8 @@ void Sandbox::display(GLContextData& contextData) const
 			++numSteps;
 			}
 		#else
-                /*  STOPWATER
 		if(totalTimeStep>1.0e-8f)
 			std::cout<<"Ran out of time by "<<totalTimeStep<<std::endl;
-                */
 		#endif
 		
 		/* Mark the water simulation state as up-to-date for this frame: */
