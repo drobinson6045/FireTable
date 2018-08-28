@@ -844,7 +844,7 @@ void WaterTable2::setWaterLevel(const GLfloat* waterGrid,GLContextData& contextD
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
-	std::cout<<"Using setWaterLevel"<<std::endl;
+	std::cout<<"Using setWaterLevel in WaterTable2"<<std::endl;
 	/* Set up the integration frame buffer to adapt the new water level to the current bathymetry: */
 	glPushAttrib(GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
