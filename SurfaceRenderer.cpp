@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "SurfaceRenderer.h"
 
+
+#include <iostream>
 #include <string>
 #include <vector>
 #include <Misc/PrintInteger.h>
@@ -620,6 +622,7 @@ void SurfaceRenderer::initContext(GLContextData& contextData) const
 	
 	/* Create the height map render shader: */
 	dataItem->heightMapShader=createSinglePassSurfaceShader(*contextData.getLightTracker(),dataItem->heightMapShaderUniforms);
+	std::cout<<"init Context"<<std::endl;        
 	dataItem->surfaceSettingsVersion=surfaceSettingsVersion;
 	dataItem->lightTrackerVersion=contextData.getLightTracker()->getVersion();
 	
@@ -794,6 +797,8 @@ void SurfaceRenderer::renderSinglePass(const int viewport[4],const PTransform& p
 		try
 			{
 			GLhandleARB newShader=createSinglePassSurfaceShader(*contextData.getLightTracker(),dataItem->heightMapShaderUniforms);
+		        std::cout<<"Single Pass"<<std::endl;
+			
 			glDeleteObjectARB(dataItem->heightMapShader);
 			dataItem->heightMapShader=newShader;
 			}

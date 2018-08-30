@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //NoWater Branch
 #include "WaterTable2.h"
 
+#include <iostream>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string>
@@ -414,6 +415,17 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	/* Create the cell-centered quantity state textures: */
 	glGenTextures(3,dataItem->quantityTextureObjects);
 	GLfloat* q=makeBuffer(size[0],size[1],3,double(domain.min[2]),0.0,0.0);
+	std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER
+	int begX, endX, begY, endY;
+	begX = 100;
+	endX = 500;
+	begY = 200;
+	endY = 250;
+	for(int i = begX; i<=endX;i++){
+		for(int j = begY; j<= endY; j++){
+			q[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			}
+		}
 	for(int i=0;i<3;++i)
 		{
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[i]);

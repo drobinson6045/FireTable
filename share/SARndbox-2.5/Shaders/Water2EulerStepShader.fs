@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #extension GL_ARB_texture_rectangle : enable
 
+
 uniform float stepSize;
 uniform float attenuation;
 uniform sampler2DRect quantitySampler;
@@ -31,7 +32,7 @@ void main()
 	/* Calculate the Euler step: */
 	vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
 	vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
-	vec3 newQ=q+qt*stepSize;
+	vec3 newQ=q+qt*stepSize*0.0;
 	newQ.yz*=attenuation;
 	gl_FragColor=vec4(newQ,0.0);
 	}

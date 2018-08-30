@@ -1350,6 +1350,7 @@ void Sandbox::display(GLContextData& contextData) const
 			{
 			/* Run with a self-determined time step to maintain stability: */
 			waterTable->setMaxStepSize(totalTimeStep);
+
 			GLfloat timeStep=waterTable->runSimulationStep(false,contextData);
 			totalTimeStep-=timeStep;
 			++numSteps;
