@@ -77,7 +77,7 @@ class WaterTable2:public GLObject
 		GLhandleARB boundaryShader; // Shader to enforce boundary conditions on the quantities grid
 		GLint boundaryShaderUniformLocations[1];
 		GLhandleARB eulerStepShader; // Shader to compute an Euler integration step
-		GLint eulerStepShaderUniformLocations[4];
+		GLint eulerStepShaderUniformLocations[5];//NOWATER WAS LENGTH 4
 		GLhandleARB rungeKuttaStepShader; // Shader to compute a Runge-Kutta integration step
 		GLint rungeKuttaStepShaderUniformLocations[5];
 		GLhandleARB waterAddShader; // Shader to render water adder objects

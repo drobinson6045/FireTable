@@ -26,21 +26,24 @@ uniform float stepSize;
 uniform float attenuation;
 uniform sampler2DRect quantitySampler;
 uniform sampler2DRect derivativeSampler;
+uniform sampler2DRect bathymetrySampler;
 
 void main()
 	{
 	/* Calculate the Euler step: */
 	//if(gl_FragCoord.x>=1 && gl_FragCoord.y>=1){
-		vec3 q=texture2DRect(quantitySampler,vec2(gl_FragCoord.x-0.51,gl_FragCoord.y-0.51)).rgb;
+	vec3 elevations = {0.0, 1000.0,  1000.0};
+	vec3 q=texture2DRect(quantitySampler,vec2(gl_FragCoord.x-0.051,gl_FragCoord.y-0.051)).rgb;
 	/*}/*else{
                 vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
 	}
 	*/
+	vec3 bath = texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x-0.51,gl_FragCoord.y-0.051)).rgb;
 	vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	vec3 newQ=q+qt*stepSize*0.0;
 	newQ.yz*=attenuation;
-	if(q.r >= 9.0 ){
-		gl_FragColor=vec4(q,0.0);
+	if(bath.r >= 9.0 ){
+		gl_FragColor=vec4(bath+elevations,0.0);
 	}
 	//else{
 	//	gl_FragColor=vec4(10.0,0.0,0.0,0.0);
