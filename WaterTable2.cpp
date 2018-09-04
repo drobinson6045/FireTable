@@ -625,6 +625,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->eulerStepShader,"attenuation");
 	dataItem->eulerStepShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->eulerStepShader,"quantitySampler");
 	dataItem->eulerStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->eulerStepShader,"derivativeSampler");
+dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->eulerStepShader,"bathymetrySampler");//NOWATER
 	}
 	
 	/* Create the Runge-Kutta integration step shader: */
@@ -940,6 +941,9 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
+	glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],0);//NOWATER
 	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
