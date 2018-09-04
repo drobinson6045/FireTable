@@ -30,9 +30,20 @@ uniform sampler2DRect derivativeSampler;
 void main()
 	{
 	/* Calculate the Euler step: */
-	vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
+	//if(gl_FragCoord.x>=1 && gl_FragCoord.y>=1){
+		vec3 q=texture2DRect(quantitySampler,vec2(gl_FragCoord.x-0.51,gl_FragCoord.y-0.51)).rgb;
+	/*}/*else{
+                vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
+	}
+	*/
 	vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	vec3 newQ=q+qt*stepSize*0.0;
 	newQ.yz*=attenuation;
-	gl_FragColor=vec4(newQ,0.0);
+	if(q.r >= 9.0 ){
+		gl_FragColor=vec4(q,0.0);
+	}
+	//else{
+	//	gl_FragColor=vec4(10.0,0.0,0.0,0.0);
+	//}
+	
 	}

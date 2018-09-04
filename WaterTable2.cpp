@@ -856,7 +856,7 @@ void WaterTable2::setWaterLevel(const GLfloat* waterGrid,GLContextData& contextD
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
-	std::cout<<"Using setWaterLevel in WaterTable2"<<std::endl;
+	std::cout<<"Using setWaterLevel in WaterTable2"<<std::endl;//NOWATER
 	/* Set up the integration frame buffer to adapt the new water level to the current bathymetry: */
 	glPushAttrib(GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
@@ -918,8 +918,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	Step 1: Calculate temporal derivative of most recent quantities.
 	********************************************************************
 	*/
-	GLfloat stepSize=calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity],!forceStepSize);
-	
+	//NOWATERGLfloat stepSize=calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity],!forceStepSize);
+	GLfloat stepSize = 0.02;//NOWATER
 	/*********************************************************************
 	Step 2: Perform the tentative Euler integration step.
 	*********************************************************************/
@@ -951,7 +951,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	Step 3: Calculate temporal derivative of intermediate quantities.
 	*********************************************************************/
 	
-	calcDerivative(dataItem,dataItem->quantityTextureObjects[2],false);
+	//NOWATERcalcDerivative(dataItem,dataItem->quantityTextureObjects[2],false);
 	
 	/*********************************************************************
 	Step 4: Perform the final Runge-Kutta integration step.
@@ -962,10 +962,12 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
 	glViewport(0,0,size[0],size[1]);
 	/* Set up the Runge-Kutta integration step shader: */
+	// NOWATER
 	glUseProgramObjectARB(dataItem->rungeKuttaStepShader);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
 	glActiveTextureARB(GL_TEXTURE0_ARB);
+	std::cout<<stepSize<<", "<<dataItem->currentQuantity<<std::endl;
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[2],0);
 	glActiveTextureARB(GL_TEXTURE1_ARB);
@@ -975,6 +977,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);
 	/* Run the Runge-Kutta integration step: */
+	
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
 	glVertex2i(size[0],0);
