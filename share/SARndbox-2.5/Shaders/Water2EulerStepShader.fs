@@ -46,15 +46,15 @@ void main()
           vec3 quant = texture2DRect(quantitySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
 	  vec3 bath = texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
           float diff = quant.r-bath.r;
-          if(diff >=0.0 && diff<= 3.0){
-            totFire += diff;
+          if(diff >=0.9){
+            totFire += diff*0.005;
           }
         }
         vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
         curQuant.r += totFire;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	//vec3 newQ=q+qt*stepSize*0.0;
-	newQ.yz*=attenuation;
+	//newQ.yz*=attenuation;
 	//if(bath.r >= 9.0 ){
         //		gl_FragColor=vec4(bath+elevations,0.0);
 	//}

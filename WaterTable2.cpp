@@ -943,7 +943,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
 	glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],0);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER
 	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
