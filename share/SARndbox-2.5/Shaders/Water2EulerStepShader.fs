@@ -26,7 +26,8 @@ uniform float stepSize;
 uniform float attenuation;
 uniform sampler2DRect quantitySampler;
 uniform sampler2DRect derivativeSampler;
-uniform sampler2DRect bathymetrySampler;
+uniform sampler2DRect bathymetrySampler;//NOWATER
+uniform sampler2DRect fireSampler;//NOWATER
 
 void main()
 	{
@@ -43,25 +44,29 @@ void main()
         float shiftY[9] = {0.51,0.51,0.51,0.0,0.0,0.0,-0.51,-0.51,-0.51}; 
         float totFire = 0.0;
         for(int i=0; i<9; i++){
-          vec3 quant = texture2DRect(quantitySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
-	  vec3 bath = texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
+          vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
+	  /*vec3 bath = texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
           float diff = quant.r-bath.r;
           if(diff >=0.9){
             totFire += diff*0.005;
-          }
+          }*/
+          totFire+=fire;
         }
-        vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
-        curQuant.r += totFire;
+        //vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
+        //curQuant.r += totFire;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	//vec3 newQ=q+qt*stepSize*0.0;
 	//newQ.yz*=attenuation;
 	//if(bath.r >= 9.0 ){
+         
         //		gl_FragColor=vec4(bath+elevations,0.0);
 	//}
 	//else{
 	//	gl_FragColor=vec4(10.0,0.0,0.0,0.0);
 	//}
         
-        gl_FragColor = vec4(curQuant,0.0);
+	vec3 curFire=texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
+        curFire.r += totFire;
+        gl_FragColor = vec4(curFire,0.0);
 	
 	}

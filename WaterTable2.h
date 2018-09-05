@@ -58,6 +58,8 @@ class WaterTable2:public GLObject
 		unsigned int bathymetryVersion; // Version number of the most recent bathymetry grid
 		GLuint quantityTextureObjects[3]; // Double-buffered three-component color texture object holding the cell-centered conserved quantity grid (w, hu, hv)
 		int currentQuantity; // Index of quantity texture containing the most recent conserved quantity grid
+                GLuint fireTextureObjects[2]; // Texture for storing cell-centered fire state
+                int currentFire;
 		GLuint derivativeTextureObject; // Three-component color texture object holding the cell-centered temporal derivative grid
 		GLuint maxStepSizeTextureObjects[2]; // Double-buffered one-component color texture objects to gather the maximum step size for Runge-Kutta integration steps
 		GLuint waterTextureObject; // One-component color texture object to add or remove water to/from the conserved quantity grid
@@ -77,9 +79,9 @@ class WaterTable2:public GLObject
 		GLhandleARB boundaryShader; // Shader to enforce boundary conditions on the quantities grid
 		GLint boundaryShaderUniformLocations[1];
 		GLhandleARB eulerStepShader; // Shader to compute an Euler integration step
-		GLint eulerStepShaderUniformLocations[5];//NOWATER WAS LENGTH 4
+		GLint eulerStepShaderUniformLocations[6];//NOWATER WAS LENGTH 4
 		GLhandleARB rungeKuttaStepShader; // Shader to compute a Runge-Kutta integration step
-		GLint rungeKuttaStepShaderUniformLocations[5];
+		GLint rungeKuttaStepShaderUniformLocations[6];
 		GLhandleARB waterAddShader; // Shader to render water adder objects
 		GLint waterAddShaderUniformLocations[3];
 		GLhandleARB waterShader; // Shader to add or remove water from the conserved quantities grid

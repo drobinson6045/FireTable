@@ -82,7 +82,7 @@ Methods of class WaterTable2::DataItem:
 **************************************/
 
 WaterTable2::DataItem::DataItem(void)
-	:currentBathymetry(0),bathymetryVersion(0),currentQuantity(0),
+	:currentBathymetry(0),bathymetryVersion(0),currentQuantity(0),currentFire(0),
 	 derivativeTextureObject(0),waterTextureObject(0),
 	 bathymetryFramebufferObject(0),derivativeFramebufferObject(0),maxStepSizeFramebufferObject(0),integrationFramebufferObject(0),waterFramebufferObject(0),
 	 bathymetryShader(0),waterAdaptShader(0),derivativeShader(0),maxStepSizeShader(0),boundaryShader(0),eulerStepShader(0),rungeKuttaStepShader(0),waterAddShader(0),waterShader(0)
@@ -91,6 +91,7 @@ WaterTable2::DataItem::DataItem(void)
 		{
 		bathymetryTextureObjects[i]=0;
 		maxStepSizeTextureObjects[i]=0;
+                fireTextureObjects[i]=0;//NOWATER
 		}
 	for(int i=0;i<3;++i)
 		quantityTextureObjects[i]=0;
@@ -115,6 +116,7 @@ WaterTable2::DataItem::~DataItem(void)
 	glDeleteTextures(1,&derivativeTextureObject);
 	glDeleteTextures(2,maxStepSizeTextureObjects);
 	glDeleteTextures(1,&waterTextureObject);
+        glDeleteTextures(1,&fireTextureObjects);
 	glDeleteFramebuffersEXT(1,&bathymetryFramebufferObject);
 	glDeleteFramebuffersEXT(1,&derivativeFramebufferObject);
 	glDeleteFramebuffersEXT(1,&maxStepSizeFramebufferObject);
@@ -437,6 +439,35 @@ void WaterTable2::initContext(GLContextData& contextData) const
 		}
 	delete[] q;
 	}
+
+        {
+	/* Create the cell-centered fire state texture: */
+	glGenTextures(2,dataItem->fireTextureObjects);
+	GLfloat* q=makeBuffer(size[0],size[1],1,double(domain.min[2]),0.0,0.0);
+        //NOWATER
+	int begX, endX, begY, endY;
+	begX = 100;
+	endX = 500;
+	begY = 200;
+	endY = 250;
+	for(int i = begX; i<=endX;i++){
+		for(int j = begY; j<= endY; j++){
+			q[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			}
+		}
+        
+    
+	for(int i=0;i<2;++i){
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
+        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,q);
+        }
+		
+	delete[] q;
+	}
 	
 	{
 	/* Create the cell-centered temporal derivative texture: */
@@ -532,6 +563,12 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	/* Attach the quantity textures to the integration step frame buffer: */
 	for(int i=0;i<3;++i)
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+i,GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[i],0);
+       
+        /* Attach the fire textures to the integration step frame buffer NOWATER */
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+3,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[0],0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+4,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1],0);
+
+
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	}
@@ -625,7 +662,9 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->eulerStepShader,"attenuation");
 	dataItem->eulerStepShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->eulerStepShader,"quantitySampler");
 	dataItem->eulerStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->eulerStepShader,"derivativeSampler");
-dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->eulerStepShader,"bathymetrySampler");//NOWATER
+        dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->eulerStepShader,"bathymetrySampler");//NOWATER
+        dataItem->eulerStepShaderUniformLocations[5]=glGetUniformLocationARB(dataItem->eulerStepShader,"fireSampler");//NOWATER
+
 	}
 	
 	/* Create the Runge-Kutta integration step shader: */
@@ -640,6 +679,7 @@ dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->e
 	dataItem->rungeKuttaStepShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"quantitySampler");
 	dataItem->rungeKuttaStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"quantityStarSampler");
 	dataItem->rungeKuttaStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"derivativeSampler");
+	dataItem->rungeKuttaStepShaderUniformLocations[5]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"fireSampler");//NOWATER
 	}
 	
 	/* Create the water adder rendering shader: */
@@ -928,7 +968,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Set up the Euler step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+3+dataItem->currentFire);//NOWATER was 2
 	glViewport(0,0,size[0],size[1]);
 	
 	/* Set up the Euler integration step shader: */
@@ -943,7 +983,10 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
 	glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER Attaching Bathymetry Texture
+	glActiveTextureARB(GL_TEXTURE3_ARB);//NOWATER
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1-dataItem->currentFire]);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],3);//NOWATER Attaching Fire Texture
 	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
@@ -981,6 +1024,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);//NOWATER
+	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],3);//NOWATER
 	/* Run the Runge-Kutta integration step: */
 	
 	glBegin(GL_QUADS);
@@ -989,6 +1034,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
 	glEnd();
+        dataItem->currentFire=1-dataItem->currentFire;//NOWATER
 	if(dryBoundary)
 		{
 		/* Set up the boundary condition shader to enforce dry boundaries: */
