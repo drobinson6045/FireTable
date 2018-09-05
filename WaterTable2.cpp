@@ -116,7 +116,7 @@ WaterTable2::DataItem::~DataItem(void)
 	glDeleteTextures(1,&derivativeTextureObject);
 	glDeleteTextures(2,maxStepSizeTextureObjects);
 	glDeleteTextures(1,&waterTextureObject);
-        glDeleteTextures(1,&fireTextureObjects);
+        glDeleteTextures(2,fireTextureObjects);
 	glDeleteFramebuffersEXT(1,&bathymetryFramebufferObject);
 	glDeleteFramebuffersEXT(1,&derivativeFramebufferObject);
 	glDeleteFramebuffersEXT(1,&maxStepSizeFramebufferObject);
