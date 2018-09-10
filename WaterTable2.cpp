@@ -950,7 +950,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	//REVERTED
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
-	
+	std::cout<<","<<std::endl;//NOWATER   
 	/* Save relevant OpenGL state: */
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
@@ -968,7 +968,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Set up the Euler step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+3+dataItem->currentFire);//NOWATER was 2
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);//3+dataItem->currentFire);//NOWATER was 2
+        std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER   
 	glViewport(0,0,size[0],size[1]);
 	
 	/* Set up the Euler integration step shader: */
@@ -994,7 +995,6 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
 	glEnd();
-	
 	/*********************************************************************
 	Step 3: Calculate temporal derivative of intermediate quantities.
 	*********************************************************************/
@@ -1024,6 +1024,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);
+	glActiveTextureARB(GL_TEXTURE3_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);//NOWATER
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],3);//NOWATER
 	/* Run the Runge-Kutta integration step: */
@@ -1128,6 +1129,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Unbind all shaders and textures: */
 	glUseProgramObjectARB(0);
+        glActiveTextureARB(GL_TEXTURE3_ARB);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,0);
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,0);
 	glActiveTextureARB(GL_TEXTURE1_ARB);

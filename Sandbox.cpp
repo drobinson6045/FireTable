@@ -1326,6 +1326,7 @@ void Sandbox::frame(void)
 
 void Sandbox::display(GLContextData& contextData) const
 	{
+        std::cout<<"SandboxDisplay"<<std::endl;//NOWATER  
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
@@ -1340,6 +1341,7 @@ void Sandbox::display(GLContextData& contextData) const
 	/* Check if the water simulation state needs to be updated: */
 	if(waterTable!=0&&dataItem->waterTableTime!=Vrui::getApplicationTime())
 		{
+                std::cout<<"SandboxDisplay"<<std::endl;//NOWATER  
 		/* Update the water table's bathymetry grid: */
 		waterTable->updateBathymetry(contextData);
 		
@@ -1350,6 +1352,7 @@ void Sandbox::display(GLContextData& contextData) const
 			{
 			/* Run with a self-determined time step to maintain stability: */
 			waterTable->setMaxStepSize(totalTimeStep);
+		        std::cout<<"here"<<std::endl;//NOWATER   
 
 			GLfloat timeStep=waterTable->runSimulationStep(false,contextData);
 			totalTimeStep-=timeStep;
@@ -1442,7 +1445,6 @@ void Sandbox::initContext(GLContextData& contextData) const
 	/* Create a data item and add it to the context: */
 	DataItem* dataItem=new DataItem;
 	contextData.addDataItem(this,dataItem);
-	
 	{
 	/* Save the currently bound frame buffer: */
 	GLint currentFrameBuffer;
