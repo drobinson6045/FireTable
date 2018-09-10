@@ -458,12 +458,12 @@ void WaterTable2::initContext(GLContextData& contextData) const
         
     
 	for(int i=0;i<2;++i){
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,q);
+          glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);
+          glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+          glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+          glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
+          glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
+          glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,q);
         }
 		
 	delete[] q;
@@ -950,7 +950,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	//REVERTED
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
-	std::cout<<","<<std::endl;//NOWATER   
+	std::cout<<"In runSimulationStep()"<<std::endl;//NOWATER   
 	/* Save relevant OpenGL state: */
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
@@ -968,6 +968,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Set up the Euler step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
+        //Draw to the third quantity texture
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);//3+dataItem->currentFire);//NOWATER was 2
         std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER   
 	glViewport(0,0,size[0],size[1]);

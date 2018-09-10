@@ -554,6 +554,7 @@ Sandbox::Sandbox(int& argc,char**& argv)
 	 waterSpeedSlider(0),waterMaxStepsSlider(0),frameRateTextField(0),waterAttenuationSlider(0),
 	 controlPipeFd(-1)
 	{
+        std::cout<<"Sandbox Sandbox()"<<std::endl;//NOWATER  
 	/* Read the sandbox's default configuration parameters: */
 	std::string sandboxConfigFileName=CONFIG_CONFIGDIR;
 	sandboxConfigFileName.push_back('/');
@@ -1040,6 +1041,7 @@ Sandbox::Sandbox(int& argc,char**& argv)
 	
 	/* Set the linear unit to support proper scaling: */
 	Vrui::getCoordinateManager()->setUnit(Geometry::LinearUnit(Geometry::LinearUnit::METER,scale/100.0));
+        std::cout<<"Sandbox Sandbox() end"<<std::endl;//NOWATER  
 	}
 
 Sandbox::~Sandbox(void)
@@ -1123,6 +1125,7 @@ bool isToken(const std::string& token,const char* pattern)
 
 void Sandbox::frame(void)
 	{
+        std::cout<<"Sandbox frame()"<<std::endl;//NOWATER  
 	/* Check if the filtered frame has been updated: */
 	if(filteredFrames.lockNewValue())
 		{
@@ -1322,6 +1325,7 @@ void Sandbox::frame(void)
 	
 	if(pauseUpdates)
 		Vrui::scheduleUpdate(Vrui::getApplicationTime()+1.0/30.0);
+        std::cout<<"Sandbox frame() end"<<std::endl;//NOWATER  
 	}
 
 void Sandbox::display(GLContextData& contextData) const
