@@ -443,7 +443,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
         {
 	/* Create the cell-centered fire state texture: */
 	glGenTextures(2,dataItem->fireTextureObjects);
-	GLfloat* q=makeBuffer(size[0],size[1],1,double(domain.min[2]),0.0,0.0);
+	GLfloat* fb=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
         //NOWATER
 	int begX, endX, begY, endY;
 	begX = 100;
@@ -452,7 +452,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	endY = 250;
 	for(int i = begX; i<=endX;i++){
 		for(int j = begY; j<= endY; j++){
-			q[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
 			}
 		}
         
@@ -463,10 +463,12 @@ void WaterTable2::initContext(GLContextData& contextData) const
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
-          glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,q);
+          glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,fb);
         }
 		
-	delete[] q;
+	delete[] fb;
+        std::cout<<"Created Fire Textures"<<std::endl;//NOWATER  
+        
 	}
 	
 	{
@@ -587,6 +589,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	/* Restore the previously bound frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,currentFrameBuffer);
 	
+        std::cout<<"Starting Shaders"<<std::endl;//NOWATER  
 	/* Create a simple vertex shader to render quads in pixel space: */
 	static const char* vertexShaderSourceTemplate="void main(){gl_Position=vec4(gl_Vertex.x*%f-1.0,gl_Vertex.y*%f-1.0,0.0,1.0);}";
 	char vertexShaderSource[256];
@@ -705,6 +708,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->waterShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->waterShader,"quantitySampler");
 	dataItem->waterShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->waterShader,"waterSampler");
 	}
+        std::cout<<"Finished Shaders"<<std::endl;//NOWATER  
 	}
 
 void WaterTable2::setElevationRange(Scalar newMin,Scalar newMax)
