@@ -47,7 +47,7 @@ void main()
           if(diff >=0.9){
             totFire += diff*0.005;
           }*/
-          totFire+=fire;
+          totFire+=fire.r;
         }
         //vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
         //curQuant.r += totFire;

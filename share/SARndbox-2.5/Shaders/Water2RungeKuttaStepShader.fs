@@ -36,7 +36,7 @@ void main()
 	//vec3 qStar=texture2DRect(quantityStarSampler,gl_FragCoord.xy).rgb;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	vec3 fire=texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
-	vec3 newQ=qStar;//NOWATER(q+qStar+qt*stepSize*0.0)*0.5;
+	//vec3 newQ=qStar;//NOWATER(q+qStar+qt*stepSize*0.0)*0.5;
 	//NOWATERnewQ.yz*=attenuation;
-	gl_FragColor=vec4(newQ,0.0);
+	gl_FragColor=vec4(q+fire,0.0);
 	}
