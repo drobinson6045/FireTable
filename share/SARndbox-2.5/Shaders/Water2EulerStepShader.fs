@@ -35,10 +35,7 @@ void main()
 	//if(gl_FragCoord.x>=1 && gl_FragCoord.y>=1){
 	//vec3 elevations = {0.0, 1000.0,  1000.0};
 	//vec3 q=texture2DRect(quantitySampler,vec2(gl_FragCoord.x-0.051,gl_FragCoord.y-0.051)).rgb;
-	/*}/*else{
-                vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
-	}
-	*/
+	
         float directions[9] = {3.0*PI*0.25, PI*0.5, PI*0.25, PI, 0.0, 0.0, 3.0*PI*0.25, 3.0*PI*0.5, 7.0*PI*0.25};
         float shiftX[9] = {-0.51, 0.0, 0.51, -0.51, 0.0, 0.51, -0.51, 0.0, 0.51}; 
         float shiftY[9] = {0.51,0.51,0.51,0.0,0.0,0.0,-0.51,-0.51,-0.51}; 
@@ -58,15 +55,14 @@ void main()
 	//vec3 newQ=q+qt*stepSize*0.0;
 	//newQ.yz*=attenuation;
 	//if(bath.r >= 9.0 ){
-         
         //		gl_FragColor=vec4(bath+elevations,0.0);
 	//}
 	//else{
 	//	gl_FragColor=vec4(10.0,0.0,0.0,0.0);
 	//}
         
-	vec3 curFire=texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
-        curFire.r += totFire;
+	vec3 curFire= {totFire, 0.0, 0.0};
+        //curFire.r += totFire;
         gl_FragColor = vec4(curFire,0.0);
 	
 	}
