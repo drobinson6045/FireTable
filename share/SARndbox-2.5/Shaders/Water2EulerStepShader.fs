@@ -49,11 +49,11 @@ void main()
 		totFire+=fire.r;
         }
 	
-        //totFire+=fire.r;
+        totFire=(totFire-texture2DRect(fireSampler,gl_FragCoord.xy).r)*0.25*0.5+texture2DRect(fireSampler,gl_FragCoord.xy).r;
         
-        //vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
+        vec3 curBath = texture2DRect(bathymetrySampler,gl_FragCoord.xy).rgb;        
         //curQuant.r += totFire;
-	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
+	vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	//vec3 newQ=q+qt*stepSize*0.0;
 	//newQ.yz*=attenuation;
 	//if(bath.r >= 9.0 ){
@@ -65,7 +65,7 @@ void main()
         if(totFire >= 2.0){
 		totFire = 2.0;
 	}
-	vec3 curFire = {totFire,0.0,0.0};
+	vec3 curFire = {totFire,0.0,0.0};//qt.g,qt.b};
         //curFire.r += totFire;
         gl_FragColor = vec4(curFire,0.0);
 	

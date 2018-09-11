@@ -967,7 +967,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	Step 1: Calculate temporal derivative of most recent quantities.
 	********************************************************************
 	*/
-	//NOWATERGLfloat stepSize=calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity],!forceStepSize);
+	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
 	GLfloat stepSize = 0.02;//NOWATER
 	/*********************************************************************
 	Step 2: Perform the tentative Euler integration step.

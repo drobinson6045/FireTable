@@ -33,6 +33,8 @@ void main()
 	{
 	/* Calculate the Runge-Kutta step: */
 	vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
+	q.g = 0.0;
+	q.b = 0.0;
 	//vec3 qStar=texture2DRect(quantityStarSampler,gl_FragCoord.xy).rgb;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	vec3 fire=texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
