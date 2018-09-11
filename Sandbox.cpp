@@ -554,7 +554,6 @@ Sandbox::Sandbox(int& argc,char**& argv)
 	 waterSpeedSlider(0),waterMaxStepsSlider(0),frameRateTextField(0),waterAttenuationSlider(0),
 	 controlPipeFd(-1)
 	{
-        std::cout<<"Sandbox Sandbox()"<<std::endl;//NOWATER  
 	/* Read the sandbox's default configuration parameters: */
 	std::string sandboxConfigFileName=CONFIG_CONFIGDIR;
 	sandboxConfigFileName.push_back('/');
@@ -1041,7 +1040,6 @@ Sandbox::Sandbox(int& argc,char**& argv)
 	
 	/* Set the linear unit to support proper scaling: */
 	Vrui::getCoordinateManager()->setUnit(Geometry::LinearUnit(Geometry::LinearUnit::METER,scale/100.0));
-        std::cout<<"Sandbox Sandbox() end"<<std::endl;//NOWATER  
 	}
 
 Sandbox::~Sandbox(void)
@@ -1124,8 +1122,7 @@ bool isToken(const std::string& token,const char* pattern)
 }
 
 void Sandbox::frame(void)
-	{
-        std::cout<<"Sandbox frame()"<<std::endl;//NOWATER  
+	{ 
 	/* Check if the filtered frame has been updated: */
 	if(filteredFrames.lockNewValue())
 		{
@@ -1324,13 +1321,11 @@ void Sandbox::frame(void)
 		}
 	
 	if(pauseUpdates)
-		Vrui::scheduleUpdate(Vrui::getApplicationTime()+1.0/30.0);
-        std::cout<<"Sandbox frame() end"<<std::endl;//NOWATER  
+		Vrui::scheduleUpdate(Vrui::getApplicationTime()+1.0/30.0); 
 	}
 
 void Sandbox::display(GLContextData& contextData) const
 	{
-        std::cout<<"SandboxDisplay"<<std::endl;//NOWATER  
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
@@ -1345,7 +1340,6 @@ void Sandbox::display(GLContextData& contextData) const
 	/* Check if the water simulation state needs to be updated: */
 	if(waterTable!=0&&dataItem->waterTableTime!=Vrui::getApplicationTime())
 		{
-                std::cout<<"SandboxDisplay"<<std::endl;//NOWATER  
 		/* Update the water table's bathymetry grid: */
 		waterTable->updateBathymetry(contextData);
 		
@@ -1356,7 +1350,6 @@ void Sandbox::display(GLContextData& contextData) const
 			{
 			/* Run with a self-determined time step to maintain stability: */
 			waterTable->setMaxStepSize(totalTimeStep);
-		        std::cout<<"here"<<std::endl;//NOWATER   
 
 			GLfloat timeStep=waterTable->runSimulationStep(false,contextData);
 			totalTimeStep-=timeStep;

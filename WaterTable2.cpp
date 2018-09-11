@@ -1018,7 +1018,6 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
 	glActiveTextureARB(GL_TEXTURE0_ARB);
-	std::cout<<stepSize<<", "<<dataItem->currentQuantity<<std::endl;
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[2],0);
 	glActiveTextureARB(GL_TEXTURE1_ARB);
