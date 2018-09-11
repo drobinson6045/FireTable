@@ -41,14 +41,16 @@ void main()
         float shiftY[9] = {0.51,0.51,0.51,0.0,0.0,0.0,-0.51,-0.51,-0.51}; 
         float totFire = 0.0;
         for(int i=0; i<9; i++){
-          vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
+        	vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
 	  /*vec3 bath = texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
           float diff = quant.r-bath.r;
           if(diff >=0.9){
-            totFire += diff*0.005;
-          }*/
-          totFire+=fire.r;
+            totFire += diff*0.005;*/
+		totFire+=fire.r;
         }
+	
+        //totFire+=fire.r;
+        
         //vec3 curQuant = texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;        
         //curQuant.r += totFire;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
@@ -60,8 +62,10 @@ void main()
 	//else{
 	//	gl_FragColor=vec4(10.0,0.0,0.0,0.0);
 	//}
-        
-	vec3 curFire= {totFire, 0.0, 0.0};
+        if(totFire >= 2.0){
+		totFire = 2.0;
+	}
+	vec3 curFire = {totFire,0.0,0.0};
         //curFire.r += totFire;
         gl_FragColor = vec4(curFire,0.0);
 	

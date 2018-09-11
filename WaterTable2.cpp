@@ -417,7 +417,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	/* Create the cell-centered quantity state textures: */
 	glGenTextures(3,dataItem->quantityTextureObjects);
 	GLfloat* q=makeBuffer(size[0],size[1],3,double(domain.min[2]),0.0,0.0);
-	int begX, endX, begY, endY;
+	/*int begX, endX, begY, endY;
 	begX = 100;
 	endX = 400;
 	begY = 200;
@@ -426,7 +426,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 		for(int j = begY; j<= endY; j++){
 			q[(i*size[0]+j)*3] = (GLfloat) 1.0;
 			}
-		}
+		}*/
 	for(int i=0;i<3;++i)
 		{
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[i]);
@@ -445,14 +445,18 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	GLfloat* fb=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
         //NOWATER
 	int begX, endX, begY, endY;
+	int cX = 150, cY = 250;
+	int rad = 25;
 	begX = 100;
-	endX = 400;
+	endX = 200;
 	begY = 200;
-	endY = 250;
+	endY = 300;
 	for(int i = begX; i<=endX;i++){
 
 		for(int j = begY; j<= endY; j++){
-			fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
+				fb[(i*size[0]+j)*3] = (GLfloat) 0.1;
+				}
 			}
 		}
         
@@ -972,7 +976,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	/* Set up the Euler step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
         //Draw to the third quantity texture
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);//3+dataItem->currentFire);//NOWATER was 2
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+3+dataItem->currentFire);//NOWATER was 2
         glViewport(0,0,size[0],size[1]);
 	
 	/* Set up the Euler integration step shader: */
