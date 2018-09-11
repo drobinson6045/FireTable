@@ -417,10 +417,9 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	/* Create the cell-centered quantity state textures: */
 	glGenTextures(3,dataItem->quantityTextureObjects);
 	GLfloat* q=makeBuffer(size[0],size[1],3,double(domain.min[2]),0.0,0.0);
-	std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER
 	int begX, endX, begY, endY;
 	begX = 100;
-	endX = 500;
+	endX = 400;
 	begY = 200;
 	endY = 250;
 	for(int i = begX; i<=endX;i++){
@@ -447,16 +446,17 @@ void WaterTable2::initContext(GLContextData& contextData) const
         //NOWATER
 	int begX, endX, begY, endY;
 	begX = 100;
-	endX = 500;
+	endX = 400;
 	begY = 200;
 	endY = 250;
 	for(int i = begX; i<=endX;i++){
+
 		for(int j = begY; j<= endY; j++){
 			q[(i*size[0]+j)*3] = (GLfloat) 1.0;
 			}
 		}
         
-    
+    	std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER
 	for(int i=0;i<2;++i){
           glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -950,7 +950,6 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	//REVERTED
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
-	std::cout<<"In runSimulationStep()"<<std::endl;//NOWATER   
 	/* Save relevant OpenGL state: */
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
@@ -970,8 +969,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
         //Draw to the third quantity texture
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+2);//3+dataItem->currentFire);//NOWATER was 2
-        std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER   
-	glViewport(0,0,size[0],size[1]);
+        glViewport(0,0,size[0],size[1]);
 	
 	/* Set up the Euler integration step shader: */
 	glUseProgramObjectARB(dataItem->eulerStepShader);
