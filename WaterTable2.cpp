@@ -447,10 +447,10 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	int begX, endX, begY, endY;
 	int cX = 150, cY = 250;
 	int rad = 25;
-	begX = 100;
-	endX = 200;
-	begY = 200;
-	endY = 300;
+	begX = 150;
+	endX = 151;
+	begY = 250;
+	endY = 251;
 	for(int i = begX; i<=endX;i++){
 
 		for(int j = begY; j<= endY; j++){
