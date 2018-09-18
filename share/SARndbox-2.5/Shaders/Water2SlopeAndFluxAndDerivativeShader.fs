@@ -39,12 +39,12 @@ void main()
 	float br=texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+cellSize.x,gl_FragCoord.y)).r;
 	float bl=texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x-cellSize.x,gl_FragCoord.y)).r;
 	float bu=texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x,gl_FragCoord.y+cellSize.y)).r;
-	float bd=texture2DRect(bathymetrySampler,gl_FragCoord.x,gl_FragCoord.y-cellSize.y).r;
+	float bd=texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x,gl_FragCoord.y-cellSize.y)).r;
         /* Calculate central differences */
-        float slopeX = (br-bl)/(2*cellSize.x);
-        float slopeY = (bu-bd)/(2*cellSize.y);
+        float slopeX = (br-bl)/(2.0*cellSize.x);
+        float slopeY = (bu-bd)/(2.0*cellSize.y);
         float az = atan(slopeY/slopeX);
-        if(az <0){ az = 2.0*PI + az;}  //atan returns [-PI,PI]
+        if(az <0.0){ az = 2.0*PI + az;}  //atan returns [-PI,PI]
         //Now calculate slope angle in that direction
 	float bp=texture2DRect(bathymetrySampler,vec2(gl_FragCoord.x+cellSize.x*cos(az),gl_FragCoord.y+cellSize.x*sin(az))).r;
 	float bc=texture2DRect(bathymetrySampler,gl_FragCoord.xy).r;

@@ -44,11 +44,12 @@ void main()
         */  
 	/* Calculate the Euler step: */
         /* Matrices for directions (0->2PI)*/
-        float directions[8] = {0.0,PI*0.25,PI*0.5,3.0*PI*0.25,PI,0.0,5.0*PI*0.25,3.0*PI*0.5,7.0*PI*0.25};
+	
+        /*float directions[8] = {0.0,PI*0.25,PI*0.5,3.0*PI*0.25,PI,5.0*PI*0.25,3.0*PI*0.5,7.0*PI*0.25};
         float shiftX[8] = {0.51,0.51,0.0,-0.51,-0.51,-0.51,0.0,0.51}; 
-        float shiftY[8] = {0.0,0.51,0.51,0.51,0.0,-0.51,-0.51,-0.51}; 
+        float shiftY[8] = {0.0,0.51,0.51,0.51,0.0,-0.51,-0.51,-0.51};*/ 
         float dd = sqrt(2.0)*cellSize.x;//diagonal grid distance to next cell center
-        float distances[2] = {cellSize.x,dd};
+        //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
         //Parameters:
         float tb = 4.0; //burn-out time
@@ -67,25 +68,30 @@ void main()
         float cont = 0.0;
         float cTime = 10.0;
         //Get current cell quantities for fire
-        vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy)).rgb;
-        if(curFire.g < tb)
-        {
-          for(int i=0; i<8; i++)
-          {
+        vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
+        //Arrays that need fixing
+	float shiftX = 0.51;
+	float shiftY = 0.51;
+	float directions = 11.0*PI/16.0;
+	float distances = cellSize.x;
+	float maxtime;
+	if(curFire.g < tb){
+          for(int i=0; i<8; i++){
+          
             // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
 
-            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
-            vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+shiftX[i],gl_FragCoord.y+shiftY[i])).rgb;
-            if(fire.r>0) //Not going to burnout and burning  Need to handle burnout
-            {
+            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
+            vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
+            if(fire.r>0.0){ //Not going to burnout and burning  Need to handle burnout
+            
               //Calctheta
-              float theta = groundState.g - directions[i];  //simple case groundState.g -> wD
-              float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2));
+              float theta = groundState.g - directions;  //simple case groundState.g -> wD
+              float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += spread*stepSize/distances[i%2];
-              float maxtime = distances[i%2]/spread;
-              if(cTime > maxtime){cTime = maxTime;}//Keep track of timestep constraint 
+              cont += spread*stepSize/distances;
+              maxtime = distances/spread;//NEED MOD HERE
+              if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
           }
           float updatedTime = curFire.g + stepSize;
