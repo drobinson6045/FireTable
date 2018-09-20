@@ -85,7 +85,7 @@ class WaterTable2:public GLObject
 		GLhandleARB surfacePropShader; // Shader to compute an Euler integration step
 		GLint surfacePropShaderUniformLocations[3];//NOWATER WAS LENGTH 4
 		GLhandleARB rungeKuttaStepShader; // Shader to compute a Runge-Kutta integration step
-		GLint rungeKuttaStepShaderUniformLocations[6];
+		GLint rungeKuttaStepShaderUniformLocations[7];
 		GLhandleARB waterAddShader; // Shader to render water adder objects
 		GLint waterAddShaderUniformLocations[3];
 		GLhandleARB waterShader; // Shader to add or remove water from the conserved quantities grid

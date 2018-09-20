@@ -22,23 +22,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #extension GL_ARB_texture_rectangle : enable
 
-uniform float stepSize;
-uniform float attenuation;
-uniform sampler2DRect quantitySampler;
-uniform sampler2DRect quantityStarSampler;
-uniform sampler2DRect derivativeSampler;
+uniform sampler2DRect bathymetrySampler;//NOWATER
 uniform sampler2DRect fireSampler;//NOWATER
 
 void main()
 	{
 	/* Calculate the Runge-Kutta step: */
-	vec3 q=texture2DRect(quantitySampler,gl_FragCoord.xy).rgb;
-	q.g = 0.0;
-	q.b = 0.0;
+	float sHeight=texture2DRect(bathymetrySampler,gl_FragCoord.xy).r;
+	
 	//vec3 qStar=texture2DRect(quantityStarSampler,gl_FragCoord.xy).rgb;
 	//vec3 qt=texture2DRect(derivativeSampler,gl_FragCoord.xy).rgb;
 	vec3 fire=texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
 	//vec3 newQ=qStar;//NOWATER(q+qStar+qt*stepSize*0.0)*0.5;
 	//NOWATERnewQ.yz*=attenuation;
-	gl_FragColor=vec4(q+fire,0.0);
+	
+	gl_FragColor=vec4(sHeight+fire.r,0.0,0.0,0.0);
+
 	}

@@ -734,6 +734,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->rungeKuttaStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"quantityStarSampler");
 	dataItem->rungeKuttaStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"derivativeSampler");
 	dataItem->rungeKuttaStepShaderUniformLocations[5]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"fireSampler");//NOWATER
+	dataItem->rungeKuttaStepShaderUniformLocations[6]=glGetUniformLocationARB(dataItem->rungeKuttaStepShader,"bathymetrySampler");//NOWATER
 	}
 	
 	/* Create the water adder rendering shader: */
@@ -1015,7 +1016,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	********************************************************************
 	*/
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
-	GLfloat stepSize = 0.02;//NOWATER
+	GLfloat stepSize = 0.01;//NOWATER
 	/*********************************************************************
 	Step 2: Perform the tentative Euler integration step.
 	*********************************************************************/
@@ -1067,7 +1068,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	/* Set up the Runge-Kutta integration step shader: */
 	// NOWATER
 	glUseProgramObjectARB(dataItem->rungeKuttaStepShader);
-	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
+	/*glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
 	glActiveTextureARB(GL_TEXTURE0_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
@@ -1077,10 +1078,15 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[3],1);
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
-	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);
-	glActiveTextureARB(GL_TEXTURE3_ARB);
+	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);*/
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
+        glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[6],0);//NOWATER
+	
+	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);//NOWATER
-	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],3);//NOWATER
+	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],1);//NOWATER
+	
 	/* Run the Runge-Kutta integration step: */
 	
 	glBegin(GL_QUADS);

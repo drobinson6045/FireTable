@@ -69,15 +69,16 @@ void main()
         float cTime = 10.0;
         //Get current cell quantities for fire
         vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
+	float burnTime = texture2DRect(fireSampler,gl_FragCoord.xy).g;
+
         //Arrays that need fixing
 	float shiftX = 0.51;
 	float shiftY = 0.51;
 	float directions = 11.0*PI/16.0;
 	float distances = cellSize.x;
 	float maxtime;
-	if(curFire.g < tb){
-          for(int i=0; i<8; i++){
-          
+	if(curFire.g < tb && curFire.r >= 0.0){
+          for(int i=0; i<8; i++){          
             // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
 
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
@@ -95,15 +96,21 @@ void main()
             }
           }
           float updatedTime = curFire.g + stepSize;
+	  //gl_FragColor = vec4(1.0,updatedTime,0.0,0.0);
+	  if(updatedTime < tb)
+          {
+            gl_FragColor = vec4(1.0,updatedTime,cTime,0.0);
+          }
           if(updatedTime >= tb)
           {
-            gl_FragColor = vec4(-1.0,updatedTime,cTime,0.0);
+            gl_FragColor = vec4(-1.0,curFire.g,cTime,0.0);
           }else
           {
-            gl_FragColor = vec4(cont,updatedTime,cTime,0.0);
+            //gl_FragColor = vec4(cont,updatedTime,cTime,0.0);
           }
         }else{   //Leave frag alone
           gl_FragColor = vec4(curFire,0.0);
         }
+	//gl_FragColor = vec4(1.0,0.0,0.0,0.0);
 
       }
