@@ -60,6 +60,7 @@ class WaterTable2:public GLObject
 		int currentQuantity; // Index of quantity texture containing the most recent conserved quantity grid
                 GLuint fireTextureObjects[2]; // Texture for storing cell-centered fire state
                 int currentFire;
+                GLuint surfacePropTextureObject;
 		GLuint derivativeTextureObject; // Three-component color texture object holding the cell-centered temporal derivative grid
 		GLuint maxStepSizeTextureObjects[2]; // Double-buffered one-component color texture objects to gather the maximum step size for Runge-Kutta integration steps
 		GLuint waterTextureObject; // One-component color texture object to add or remove water to/from the conserved quantity grid
@@ -67,6 +68,7 @@ class WaterTable2:public GLObject
 		GLuint derivativeFramebufferObject; // Frame buffer used for temporal derivative computation
 		GLuint maxStepSizeFramebufferObject; // Frame buffer used to calculate the maximum integration step size
 		GLuint integrationFramebufferObject; // Frame buffer used for the Euler and Runge-Kutta integration steps
+		GLuint surfacePropFramebufferObject; // Frame buffer used for surface derivatives
 		GLuint waterFramebufferObject; // Frame buffer used for the water rendering step
 		GLhandleARB bathymetryShader; // Shader to update cell-centered conserved quantities after a change to the bathymetry grid
 		GLint bathymetryShaderUniformLocations[3];
@@ -80,6 +82,8 @@ class WaterTable2:public GLObject
 		GLint boundaryShaderUniformLocations[1];
 		GLhandleARB eulerStepShader; // Shader to compute an Euler integration step
 		GLint eulerStepShaderUniformLocations[7];//NOWATER WAS LENGTH 4
+		GLhandleARB surfacePropShader; // Shader to compute an Euler integration step
+		GLint surfacePropShaderUniformLocations[3];//NOWATER WAS LENGTH 4
 		GLhandleARB rungeKuttaStepShader; // Shader to compute a Runge-Kutta integration step
 		GLint rungeKuttaStepShaderUniformLocations[6];
 		GLhandleARB waterAddShader; // Shader to render water adder objects

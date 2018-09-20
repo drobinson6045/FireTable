@@ -84,8 +84,8 @@ Methods of class WaterTable2::DataItem:
 WaterTable2::DataItem::DataItem(void)
 	:currentBathymetry(0),bathymetryVersion(0),currentQuantity(0),currentFire(0),
 	 derivativeTextureObject(0),waterTextureObject(0),
-	 bathymetryFramebufferObject(0),derivativeFramebufferObject(0),maxStepSizeFramebufferObject(0),integrationFramebufferObject(0),waterFramebufferObject(0),
-	 bathymetryShader(0),waterAdaptShader(0),derivativeShader(0),maxStepSizeShader(0),boundaryShader(0),eulerStepShader(0),rungeKuttaStepShader(0),waterAddShader(0),waterShader(0)
+	 bathymetryFramebufferObject(0),derivativeFramebufferObject(0),maxStepSizeFramebufferObject(0),integrationFramebufferObject(0),surfacePropFramebufferObject(0),waterFramebufferObject(0),surfacePropTextureObject(1),
+	 bathymetryShader(0),waterAdaptShader(0),derivativeShader(0),maxStepSizeShader(0),boundaryShader(0),eulerStepShader(0),surfacePropShader(0),rungeKuttaStepShader(0),waterAddShader(0),waterShader(0)
 	{
 	for(int i=0;i<2;++i)
 		{
@@ -114,13 +114,16 @@ WaterTable2::DataItem::~DataItem(void)
 	glDeleteTextures(2,bathymetryTextureObjects);
 	glDeleteTextures(3,quantityTextureObjects);
 	glDeleteTextures(1,&derivativeTextureObject);
+	glDeleteTextures(1,&surfacePropTextureObject);
 	glDeleteTextures(2,maxStepSizeTextureObjects);
 	glDeleteTextures(1,&waterTextureObject);
         glDeleteTextures(2,fireTextureObjects);
+        
 	glDeleteFramebuffersEXT(1,&bathymetryFramebufferObject);
 	glDeleteFramebuffersEXT(1,&derivativeFramebufferObject);
 	glDeleteFramebuffersEXT(1,&maxStepSizeFramebufferObject);
 	glDeleteFramebuffersEXT(1,&integrationFramebufferObject);
+	glDeleteFramebuffersEXT(1,&surfacePropFramebufferObject);
 	glDeleteFramebuffersEXT(1,&waterFramebufferObject);
 	glDeleteObjectARB(bathymetryShader);
 	glDeleteObjectARB(waterAdaptShader);
@@ -128,6 +131,7 @@ WaterTable2::DataItem::~DataItem(void)
 	glDeleteObjectARB(maxStepSizeShader);
 	glDeleteObjectARB(boundaryShader);
 	glDeleteObjectARB(eulerStepShader);
+	glDeleteObjectARB(surfacePropShader);
 	glDeleteObjectARB(rungeKuttaStepShader);
 	glDeleteObjectARB(waterAddShader);
 	glDeleteObjectARB(waterShader);
@@ -472,6 +476,22 @@ void WaterTable2::initContext(GLContextData& contextData) const
 		
 	delete[] fb;
         std::cout<<"Created Fire Textures"<<std::endl;//NOWATER  
+
+
+	{
+	/* Create the cell-centered surface properties texture: */
+	glGenTextures(1,&dataItem->surfacePropTextureObject);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
+	GLfloat* w=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_R32F,size[0],size[1],0,GL_RGB,GL_FLOAT,w);
+	delete[] w;
+	}
+
+        std::cout<<"Created Surface Property Texture"<<std::endl;//NOWATER  
         
 	}
 	
@@ -578,6 +598,19 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	}
+
+	{
+	/* Create the surface property frame buffer: */
+	glGenFramebuffersEXT(1,&dataItem->surfacePropFramebufferObject);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->surfacePropFramebufferObject);
+	
+	/* Attach the quantity textures to the integration step frame buffer: */
+       
+        /* Attach the surface texture to the surface frame buffer NOWATER */
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject,0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	}
 	
 	{
 	/* Create the water frame buffer: */
@@ -674,6 +707,19 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[6]=glGetUniformLocationARB(dataItem->eulerStepShader,"cellSize");
 
 	}
+	/* Create the surfaceProperty shader: */
+	{
+	GLhandleARB vertexShader=glCompileVertexShaderFromString(vertexShaderSource);
+	GLhandleARB fragmentShader=compileFragmentShader("SurfacePropertyShader");
+	dataItem->surfacePropShader=glLinkShader(vertexShader,fragmentShader);
+	glDeleteObjectARB(vertexShader);
+	glDeleteObjectARB(fragmentShader);
+	dataItem->surfacePropShaderUniformLocations[0]=glGetUniformLocationARB(dataItem->surfacePropShader,"cellSize");
+        dataItem->surfacePropShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->surfacePropShader,"bathymetrySampler");//NOWATER
+        dataItem->surfacePropShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->surfacePropShader,"fireSampler");//NOWATER
+	}
+        std::cout<<"Surface Shader Complete"<<std::endl;//NOWATER  
+
 	
 	/* Create the Runge-Kutta integration step shader: */
 	{
