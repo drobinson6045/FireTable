@@ -29,7 +29,7 @@ uniform sampler2DRect maxStepSizeSampler;
 void main()
 	{
 	/* Calculate the base position of a 2x2 tile of pixels: */
-	vec2 frag=gl_FragCoord.xy*2.0-vec2(0.5,0.5);
+	vec2 frag=gl_FragCoord.xy*2.0-vec2(0.5,0.5);//GOES TO 0.5 PAST SIZE[0]/SIZE[1]
 	
 	/* Accumulate the minimum value of the 2x2 tile: */
 	float maxStepSize=texture2DRect(maxStepSizeSampler,frag).r;

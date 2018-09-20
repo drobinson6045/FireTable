@@ -671,6 +671,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->eulerStepShader,"derivativeSampler");
         dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->eulerStepShader,"bathymetrySampler");//NOWATER
         dataItem->eulerStepShaderUniformLocations[5]=glGetUniformLocationARB(dataItem->eulerStepShader,"fireSampler");//NOWATER
+	dataItem->eulerStepShaderUniformLocations[6]=glGetUniformLocationARB(dataItem->eulerStepShader,"cellSize");
 
 	}
 	
@@ -995,6 +996,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE3_ARB);//NOWATER
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1-dataItem->currentFire]);//NOWATER
         glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],3);//NOWATER Attaching Fire Texture
+	glUniformARB<2>(dataItem->eulerStepShaderUniformLocations[6],1,cellSize);
 	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
@@ -1159,6 +1161,15 @@ void WaterTable2::bindBathymetryTexture(GLContextData& contextData) const
 	
 	/* Bind the bathymetry texture: */
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
+	}
+
+void WaterTable2::bindFireTexture(GLContextData& contextData) const
+	{
+	/* Get the data item: */
+	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
+	
+	/* Bind the bathymetry texture: */
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);
 	}
 
 void WaterTable2::bindQuantityTexture(GLContextData& contextData) const

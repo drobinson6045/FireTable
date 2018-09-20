@@ -919,6 +919,15 @@ void SurfaceRenderer::renderSinglePass(const int viewport[4],const PTransform& p
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 		glUniform1iARB(*(ulPtr++),4);
 		
+		/* Bind the fire texture: NOWATER*/
+		glActiveTextureARB(GL_TEXTURE5_ARB);
+		waterTable->bindFireTexture(contextData);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+		glUniform1iARB(*(ulPtr++),5);
+
 		/* Upload the water grid cell size for normal vector calculation: */
 		glUniformARB<2>(*(ulPtr++),1,waterTable->getCellSize());
 		
