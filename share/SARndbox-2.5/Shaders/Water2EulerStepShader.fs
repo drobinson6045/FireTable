@@ -83,34 +83,26 @@ void main()
 
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
             vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
-            if(fire.r>0.0){ //Not going to burnout and burning  Need to handle burnout
+            
+	    if(fire.r>=1.0){ //Not going to burnout and burning  Need to handle burnout
             
               //Calctheta
               float theta = groundState.g - directions;  //simple case groundState.g -> wD
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += spread*stepSize/distances;
+              cont += fire.r/8.0;//spread*stepSize/distances;
               maxtime = distances/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
           }
-          float updatedTime = curFire.g + stepSize;
-	  //gl_FragColor = vec4(1.0,updatedTime,0.0,0.0);
-	  if(updatedTime < tb)
-          {
-            gl_FragColor = vec4(1.0,updatedTime,cTime,0.0);
-          }
-          if(updatedTime >= tb)
-          {
-            gl_FragColor = vec4(-1.0,curFire.g,cTime,0.0);
-          }else
-          {
-            //gl_FragColor = vec4(cont,updatedTime,cTime,0.0);
-          }
-        }else{   //Leave frag alone
-          gl_FragColor = vec4(curFire,0.0);
+	  curFire.r+= cont;
+	  float newTime = curFire.g + stepSize;
+	}elseif(curFire.g>=tb){
+          curFire.r = -1.0;
+	  float newTime = curFire.g;
         }
-	//gl_FragColor = vec4(1.0,0.0,0.0,0.0);
+	gl_FragColor = vec4(curFire.r,newTime,0.0,0.0);
+	
 
       }
