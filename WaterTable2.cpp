@@ -459,7 +459,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 
 		for(int j = begY; j<= endY; j++){
 			if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
-				fb[(i*size[0]+j)*3] = (GLfloat) 0.1;
+				fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
 				}
 			}
 		}
