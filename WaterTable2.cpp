@@ -451,16 +451,16 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	int begX, endX, begY, endY;
 	int cX = 150, cY = 250;
 	int rad = 25;
-	begX = 150;
-	endX = 151;
-	begY = 250;
-	endY = 251;
+	begX = 300;
+	endX = 350;
+	begY = 300;
+	endY = 350;
 	for(int i = begX; i<=endX;i++){
 
 		for(int j = begY; j<= endY; j++){
-			if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
+			//if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
 				fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
-				}
+			//	}
 			}
 		}
         
@@ -1016,7 +1016,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	********************************************************************
 	*/
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
-	GLfloat stepSize = 0.01;//NOWATER
+	GLfloat stepSize = 5.0*0.01;//NOWATER
 	/*********************************************************************
 	Step 2: Perform the tentative Euler integration step.
 	*********************************************************************/
@@ -1025,7 +1025,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
         //Draw to the third quantity texture
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+3+dataItem->currentFire);//NOWATER was 2
-        glViewport(0,0,size[0],size[1]);
+        glViewport(5,5,size[0]-5,size[1]-5);
 	
 	/* Set up the Euler integration step shader: */
 	glUseProgramObjectARB(dataItem->eulerStepShader);

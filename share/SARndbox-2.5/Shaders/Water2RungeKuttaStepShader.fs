@@ -36,6 +36,6 @@ void main()
 	//vec3 newQ=qStar;//NOWATER(q+qStar+qt*stepSize*0.0)*0.5;
 	//NOWATERnewQ.yz*=attenuation;
 	
-	gl_FragColor=vec4(sHeight+fire.r,0.0,0.0,0.0);
+	gl_FragColor=vec4(sHeight,0.0,0.0,0.0);
 
 	}

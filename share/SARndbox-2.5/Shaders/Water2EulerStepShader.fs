@@ -30,6 +30,11 @@ uniform sampler2DRect bathymetrySampler;//NOWATER
 uniform sampler2DRect fireSampler;//NOWATER
 uniform vec2 cellSize;
 
+float modI(float a,float b) {
+    float m=a-floor((a+0.5)/b)*b;
+    return floor(m+0.5);
+}
+
 void main()
 	{
         /*Calculate phiS, phiW, and EBar
@@ -80,19 +85,21 @@ void main()
 	float maxtime;
         //if cell isn't burned out
 	if(curFire.g < tb){
+	  
+	  float iter = 0.0;
           for(int i=0; i<8; i++){          
-            // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
+         
+	    // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
             float cAngle = deltaDir*i;
-            float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),mod(i,2));
-            float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),mod(i,2));
-
+	    iter+= i;
+            float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
+            float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
-            //groundState gives garbage now   surface properties texture not being filled yet 
-            
-            
+            //groundState gives garbage now   surface properties texture not being filled yet
 	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
-              float dist = cellSize.x*pow(sqrt(2.0),mod(i,2));
+
+              float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
               //Calctheta
               float theta = groundState.g - cAngle;  //simple case groundState.g -> wD
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
@@ -104,14 +111,15 @@ void main()
             }
           }
 	  curFire.r+= cont*stepSize;
+	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
 	  newTime = curFire.g + stepSize;
-	}
+	  }
         //if fuel in cell is consumed
 	if(curFire.g>=tb){
-          curFire.r = -1.0;
+	  cTime = -10.0;
 	  newTime = curFire.g;
         }
-	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
+	gl_FragColor = vec4(curFire.r,0.0,cTime,0.0);
 	
 
       }
