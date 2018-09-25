@@ -52,6 +52,7 @@ void main()
         //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
         //Parameters:
+        float deltaDir = 0.25*PI;
         float tb = 4.0; //burn-out time
         float wD = PI*0.25; //Wind-Direction with respect to x-axis
         float wS = 3.0; //Wind-Speed (m/s)  might need to be cm/s
@@ -77,33 +78,40 @@ void main()
 	float directions = 13.0*PI/16.0;
 	float distances = cellSize.x;
 	float maxtime;
-	if(curFire.g < tb && curFire.r >= 1.0){
+        //if cell isn't burned out
+	if(curFire.g < tb){
           for(int i=0; i<8; i++){          
             // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
+            float cAngle = deltaDir*i;
+            float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),mod(i,2));
+            float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),mod(i,2));
 
-            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
-            vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+shiftX,gl_FragCoord.y+shiftY)).rgb;
+            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
+            vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
+            //groundState gives garbage now   surface properties texture not being filled yet 
             
-	    if(fire.r>=1.0){ //Not going to burnout and burning  Need to handle burnout
             
+	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
+              float dist = cellSize.x*pow(sqrt(2.0),mod(i,2));
               //Calctheta
-              float theta = groundState.g - directions;  //simple case groundState.g -> wD
+              float theta = groundState.g - cAngle;  //simple case groundState.g -> wD
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += fire.r/8.0;//spread*stepSize/distances;
-              maxtime = distances/spread;//NEED MOD HERE
+              cont += fire.r/8.0/dist;//spread/distances;
+              maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
           }
-	  curFire.r+= cont;
+	  curFire.r+= cont*stepSize;
 	  newTime = curFire.g + stepSize;
 	}
+        //if fuel in cell is consumed
 	if(curFire.g>=tb){
           curFire.r = -1.0;
 	  newTime = curFire.g;
         }
-	gl_FragColor = vec4(curFire.r,newTime,0.0,0.0);
+	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
 	
 
       }
