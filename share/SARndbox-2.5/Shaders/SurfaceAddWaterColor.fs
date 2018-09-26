@@ -159,7 +159,8 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	float fireLevel=texture2DRect(fireSampler,waterTexCoord).r;
 	float fireTime = texture2DRect(fireSampler,waterTexCoord).g;
 	float status = texture2DRect(fireSampler,waterTexCoord).b;
-	/* Check if the surface is under water: */
+	float opacity = 0.4;
+        /* Check if the surface is under water: */
 	if(fireLevel>1.0){
           /* Calculate the water color: */
           // float colorW=max(snoise(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Simple noise function
@@ -172,15 +173,18 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           // vec4 waterColor=vec4(0.0,0.0,1.0,1.0); // Blue
           
           /* Mix the fire color with the base surface color (can become based on the fire intensity): */
-	  if(fireLevel > 4.5){
+	  //if(fireLevel > 4.5){
             //vec4 waterColor=vec4(1.0,0.0,0.0,1.0);
-            vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
-	    }
-	  if(status>15.0){
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
-	    waterColor.b += 1.0;
+	    //}
+	  if(fireTime>4.0){
+            //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
+	    waterColor.r =0.0;
+	    waterColor.g = 0.0;
+            waterColor.b = 0.0;
+	    opacity+=0.4;
 	    }
-          baseColor=mix(baseColor,waterColor,0.5);//min(waterLevel*waterOpacity,1.0));
+          baseColor=mix(baseColor,waterColor,opacity);//min(waterLevel*waterOpacity,1.0));
 
           }
         //if(0){
@@ -195,7 +199,7 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           // vec4 waterColor=vec4(0.0,0.0,1.0,1.0); // Blue
           
           /* Mix the fire color with the base surface color (can become based on the fire intensity): */
-	  //baseColor=mix(baseColor,waterColor,0.75);//min(waterLevel*waterOpacity,1.0));
+	  //baseColor=mix(baseColor,waterColor,0.5);//min(waterLevel*waterOpacity,1.0));
           //}*/
 
           

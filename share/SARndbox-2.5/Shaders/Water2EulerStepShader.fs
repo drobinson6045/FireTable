@@ -76,7 +76,7 @@ void main()
         //Get current cell quantities for fire
         vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
 	float burnTime = texture2DRect(fireSampler,gl_FragCoord.xy).g;
-	float newTime = 0.0;
+	float newTime = curFire.g;
         //Arrays that need fixing
 	float shiftX = 0.51;
 	float shiftY = 0.51;
@@ -112,14 +112,15 @@ void main()
           }
 	  curFire.r+= cont*stepSize;
 	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
-	  newTime = curFire.g + stepSize;
+	  if(curFire.r>= 1.0){
+	    newTime +=  stepSize;
+	    }
 	  }
         //if fuel in cell is consumed
 	if(curFire.g>=tb){
 	  cTime = -10.0;
-	  newTime = curFire.g;
         }
-	gl_FragColor = vec4(curFire.r,0.0,cTime,0.0);
+	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
 	
 
       }

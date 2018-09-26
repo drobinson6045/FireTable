@@ -1025,7 +1025,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
         //Draw to the third quantity texture
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+3+dataItem->currentFire);//NOWATER was 2
-        glViewport(5,5,size[0]-5,size[1]-5);
+        glViewport(0,0,size[0],size[1]);
 	
 	/* Set up the Euler integration step shader: */
 	glUseProgramObjectARB(dataItem->eulerStepShader);
