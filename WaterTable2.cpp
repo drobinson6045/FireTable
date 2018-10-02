@@ -704,7 +704,8 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[3]=glGetUniformLocationARB(dataItem->eulerStepShader,"derivativeSampler");
         dataItem->eulerStepShaderUniformLocations[4]=glGetUniformLocationARB(dataItem->eulerStepShader,"bathymetrySampler");//NOWATER
         dataItem->eulerStepShaderUniformLocations[5]=glGetUniformLocationARB(dataItem->eulerStepShader,"fireSampler");//NOWATER
-	dataItem->eulerStepShaderUniformLocations[6]=glGetUniformLocationARB(dataItem->eulerStepShader,"cellSize");
+	dataItem->eulerStepShaderUniformLocations[6]=glGetUniformLocationARB(dataItem->eulerStepShader,"surfaceSampler");
+	dataItem->eulerStepShaderUniformLocations[7]=glGetUniformLocationARB(dataItem->eulerStepShader,"cellSize");
 
 	}
 	/* Create the surfaceProperty shader: */
@@ -1018,6 +1019,29 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
 	GLfloat stepSize = 5.0*0.01;//NOWATER
 	/*********************************************************************
+	Caculate Surface Properties 
+	*********************************************************************/
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->surfacePropFramebufferObject);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+        glViewport(0,0,size[0],size[1]);
+	glUseProgramObjectARB(dataItem->surfacePropShader);
+	glUniformARB<2>(dataItem->surfacePropShaderUniformLocations[0],1,cellSize);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
+	glUniform1iARB(dataItem->surfacePropShaderUniformLocations[1],0);
+	glActiveTextureARB(GL_TEXTURE1_ARB);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);
+	glUniform1iARB(dataItem->surfacePropShaderUniformLocations[2],1);
+
+        //Run the surface prop shader
+	glBegin(GL_QUADS);
+	glVertex2i(0,0);
+	glVertex2i(size[0],0);
+	glVertex2i(size[0],size[1]);
+	glVertex2i(0,size[1]);
+	glEnd();
+
+	/*********************************************************************
 	Step 2: Perform the tentative Euler integration step.
 	*********************************************************************/
 	
@@ -1030,20 +1054,27 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	/* Set up the Euler integration step shader: */
 	glUseProgramObjectARB(dataItem->eulerStepShader);
 	glUniformARB(dataItem->eulerStepShaderUniformLocations[0],stepSize);
-	glUniformARB(dataItem->eulerStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
-	glActiveTextureARB(GL_TEXTURE0_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
-	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[2],0);
-	glActiveTextureARB(GL_TEXTURE1_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
-	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
-	glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER Attaching Bathymetry Texture
-	glActiveTextureARB(GL_TEXTURE3_ARB);//NOWATER
+
+	//glUniformARB(dataItem->eulerStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
+	//glActiveTextureARB(GL_TEXTURE0_ARB);
+	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
+	//glUniform1iARB(dataItem->eulerStepShaderUniformLocations[2],0);
+	//glActiveTextureARB(GL_TEXTURE1_ARB);
+	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
+	//glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
+	//glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
+        //glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
+        //glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER Attaching Bathymetry Texture
+        
+	glActiveTextureARB(GL_TEXTURE0_ARB);//NOWATER
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1-dataItem->currentFire]);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],3);//NOWATER Attaching Fire Texture
-	glUniformARB<2>(dataItem->eulerStepShaderUniformLocations[6],1,cellSize);
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],0);//NOWATER Attaching Fire Texture
+	glActiveTextureARB(GL_TEXTURE1_ARB);//NOWATER
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[6],1);//NOWATER
+
+	glUniformARB<2>(dataItem->eulerStepShaderUniformLocations[7],1,cellSize);
+
 	/* Run the Euler integration step: */
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
@@ -1051,16 +1082,18 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
 	glEnd();
+
+
 	/*********************************************************************
 	Step 3: Calculate temporal derivative of intermediate quantities.
 	*********************************************************************/
-	
+
 	//NOWATERcalcDerivative(dataItem,dataItem->quantityTextureObjects[2],false);
-	
+        
 	/*********************************************************************
 	Step 4: Perform the final Runge-Kutta integration step.
 	*********************************************************************/
-	
+
 	/* Set up the Runge-Kutta step integration frame buffer: */
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
@@ -1079,12 +1112,14 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glActiveTextureARB(GL_TEXTURE2_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);*/
+
 	glActiveTextureARB(GL_TEXTURE0_ARB);
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
         glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[6],0);//NOWATER
-	
+
 	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);//NOWATER
+
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],1);//NOWATER
 	
 	/* Run the Runge-Kutta integration step: */

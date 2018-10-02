@@ -23,11 +23,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define PI 3.1415926535897932384626433832795
    
 uniform float stepSize;
-uniform float attenuation;
-uniform sampler2DRect quantitySampler;
-uniform sampler2DRect derivativeSampler;
-uniform sampler2DRect bathymetrySampler;//NOWATER
+//uniform float attenuation;
+//uniform sampler2DRect quantitySampler;
+//uniform sampler2DRect derivativeSampler;
+//uniform sampler2DRect bathymetrySampler;//NOWATER
 uniform sampler2DRect fireSampler;//NOWATER
+uniform sampler2DRect surfaceSampler;//NOWATER
 uniform vec2 cellSize;
 
 float modI(float a,float b) {
@@ -95,17 +96,17 @@ void main()
             float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
-            vec3 groundState = texture2DRect(derivativeSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
+            vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             //groundState gives garbage now   surface properties texture not being filled yet
 	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
-              //Calctheta
+              //Calctheta 
               float theta = groundState.g - cAngle;  //simple case groundState.g -> wD
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += fire.r/8.0/dist;//spread/distances;
+              cont += spread/distances;//fire.r/8.0/dist;//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }

@@ -9,7 +9,16 @@ uniform sampler2DRect fireSampler;//NOWATER
 
 void main()
   {
-    gl_FragColor=vec4(0.0,0.0,0.0,0.0);
+
+    /*Central differences*/
+
+    float dfx =texture2DRect(fireSampler, gl_FragCoord.x+1.0,gl_FragCoord.y)-texture2DRect(fireSampler, gl_FragCoord.x-1.0,gl_FragCoord.y);
+    float dfy =texture2DRect(fireSampler, gl_FragCoord.x,gl_FragCoord.y+1.0)-texture2DRect(fireSampler, gl_FragCoord.x,gl_FragCoord.y-1.0);
+    float az = atan(dfy/(2.0*cellSize.y),dfx/(2.0*cellSize.x));
+    /*Step in azimuthal direction and get angle*/
+    float dfz =texture2DRect(fireSampler, gl_FragCoord.x+cos(az),gl_FragCoord.y+sin(az))-texture2DRect(fireSampler, gl_FragCoord.xy);
+    float alt = atan(dfz,cellSize.x);
+    gl_FragColor=vec4(alt,az,0.0,0.0);
 
 
   }
