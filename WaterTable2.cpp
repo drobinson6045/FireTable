@@ -311,6 +311,8 @@ WaterTable2::WaterTable2(GLsizei width,GLsizei height,const GLfloat sCellSize[2]
 	for(int i=0;i<2;++i)
 		cellSize[i]=sCellSize[i];
 	
+	std::cout<<cellSize[0]<<" x "<<cellSize[1]<<std::endl;
+
 	/* Calculate a simulation domain: */
 	for(int i=0;i<2;++i)
 		{
@@ -608,7 +610,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
        
         /* Attach the surface texture to the surface frame buffer NOWATER */
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject,0);
-	glDrawBuffer(GL_NONE);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 	glReadBuffer(GL_NONE);
 	}
 	
@@ -1011,6 +1013,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_VIEWPORT_BIT);
 	GLint currentFrameBuffer;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT,&currentFrameBuffer);
+	//std::cout<<cellSize[0]<<" x "<<cellSize[1]<<std::endl;
+
 	
 	/*********************************************************************
 	Step 1: Calculate temporal derivative of most recent quantities.
@@ -1019,7 +1023,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
 	GLfloat stepSize = 5.0*0.01;//NOWATER
 	/*********************************************************************
-	Caculate Surface Properties 
+	Calculate Surface Properties 
 	*********************************************************************/
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->surfacePropFramebufferObject);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);

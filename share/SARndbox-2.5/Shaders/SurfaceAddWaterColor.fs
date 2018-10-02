@@ -161,8 +161,8 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	float status = texture2DRect(fireSampler,waterTexCoord).b;
 	float opacity = 0.4;
         /* Check if the surface is under water: */
-	if(fireLevel>1.0){
-          /* Calculate the water color: */
+	/*if(fireLevel>1.0){
+          
           // float colorW=max(snoise(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Simple noise function
           // float colorW=max(turb(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Turbulence noise
           
@@ -172,7 +172,7 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           //vec4 waterColor=vec4(1.0-colorW,1.0-colorW*2.0,0.0,1.0); // Lava
           // vec4 waterColor=vec4(0.0,0.0,1.0,1.0); // Blue
           
-          /* Mix the fire color with the base surface color (can become based on the fire intensity): */
+          // Mix the fire color with the base surface color (can become based on the fire intensity): 
 	  //if(fireLevel > 4.5){
             //vec4 waterColor=vec4(1.0,0.0,0.0,1.0);
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
@@ -186,7 +186,16 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	    }
           baseColor=mix(baseColor,waterColor,opacity);//min(waterLevel*waterOpacity,1.0));
 
-          }
+          }*/
+	if(fireLevel>=0.0){
+	  baseColor = mix(baseColor,vec4(0.0,1.0,0.0,1.0),sqrt(fireLevel*fireLevel));
+	  //baseColor = vec4(0.0,1.0,0.0,1.0);
+	}
+	if(fireLevel<0.0){
+          baseColor = mix(baseColor,vec4(0.0,0.0,1.0,1.0),sqrt(fireLevel*fireLevel)); 
+	  //baseColor = vec4(0.0,1.0,0.0,1.0);
+	}
+	
         //if(0){
           /* Calculate the water color: */
           // float colorW=max(snoise(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Simple noise function
