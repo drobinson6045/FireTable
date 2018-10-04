@@ -16,9 +16,10 @@ void main()
     float dfy =texture2DRect(bathymetrySampler, vec2(gl_FragCoord.x,gl_FragCoord.y+1.0))-texture2DRect(bathymetrySampler, vec2(gl_FragCoord.x,gl_FragCoord.y-1.0));
     float az = atan(dfy/(2.0*cellSize.y),dfx/(2.0*cellSize.x));
     /*Step in azimuthal direction and get angle*/
-    float dfz =texture2DRect(bathymetrySampler, vec2(gl_FragCoord.x+cos(PI*0.0),gl_FragCoord.y+sin(PI*0.0)))-texture2DRect(bathymetrySampler, gl_FragCoord.xy);
+    float dfz =texture2DRect(bathymetrySampler, vec2(gl_FragCoord.x+cos(PI*0.5),gl_FragCoord.y+sin(PI*0.5)))-texture2DRect(bathymetrySampler, gl_FragCoord.xy);
     float alt = atan(dfz,cellSize.x);
-    gl_FragColor=vec4(alt,az,dfx,0.0);
+    float elev = texture2DRect(bathymetrySampler, gl_FragCoord.xy).r;
+    gl_FragColor=vec4(alt,az,elev,0.0);
 
 
   }

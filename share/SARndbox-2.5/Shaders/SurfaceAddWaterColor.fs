@@ -160,6 +160,9 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	float fireTime = texture2DRect(fireSampler,waterTexCoord).g;
 	float status = texture2DRect(fireSampler,waterTexCoord).b;
 	float opacity = 0.4;
+	float height = texture2DRect(bathymetrySampler,waterTexCoord).r;
+	//bath values from surface float level = 1.17549428075736428990E-38;
+	float level = 0.0;
         /* Check if the surface is under water: */
 	/*if(fireLevel>1.0){
           
@@ -187,13 +190,13 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           baseColor=mix(baseColor,waterColor,opacity);//min(waterLevel*waterOpacity,1.0));
 
           }*/
-	if(fireLevel>=0.0){
-	  baseColor = mix(baseColor,vec4(0.0,1.0,0.0,1.0),sqrt(fireLevel*fireLevel));
-	  //baseColor = vec4(0.0,1.0,0.0,1.0);
+	if(fireLevel>=level){
+	  //baseColor = mix(baseColor,vec4(0.0,1.0,0.0,1.0),sqrt(fireLevel*fireLevel));
+	  baseColor = vec4(0.0,0.0,1.0,1.0);
 	}
-	if(fireLevel<0.0){
-          baseColor = mix(baseColor,vec4(0.0,0.0,1.0,1.0),sqrt(fireLevel*fireLevel)); 
-	  //baseColor = vec4(0.0,1.0,0.0,1.0);
+	if(fireLevel<level){
+          //baseColor = mix(baseColor,vec4(0.0,0.0,1.0,1.0),sqrt(fireLevel*fireLevel)); 
+	  baseColor = vec4(0.0,1.0,0.0,1.0);
 	}
 	
         //if(0){

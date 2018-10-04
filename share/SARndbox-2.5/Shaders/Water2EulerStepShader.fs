@@ -106,7 +106,7 @@ void main()
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += spread/distances;//fire.r/8.0/dist;//spread/distances;
+              cont += fire.r/8.0/dist;//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
@@ -122,7 +122,7 @@ void main()
 	  cTime = -10.0;
         }
 	float slopeA = texture2DRect(surfaceSampler,gl_FragCoord.xy).r;
-	gl_FragColor = vec4(slopeA,newTime,cTime,0.0);
+	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
 	
 
       }
