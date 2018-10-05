@@ -122,7 +122,7 @@ void main()
 	  cTime = -10.0;
         }
 	float slopeA = texture2DRect(surfaceSampler,gl_FragCoord.xy).r;
-	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
+	gl_FragColor = vec4(slopeA,newTime,cTime,0.0);
 	
 
       }
