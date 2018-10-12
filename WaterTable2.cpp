@@ -610,7 +610,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
        
         /* Attach the surface texture to the surface frame buffer NOWATER */
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject,0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	}
 	
@@ -1026,9 +1026,9 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	Calculate Surface Properties 
 	*********************************************************************/
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->surfacePropFramebufferObject);
+	glUseProgramObjectARB(dataItem->surfacePropShader);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glViewport(0,0,size[0],size[1]);
-	glUseProgramObjectARB(dataItem->surfacePropShader);
 	glUniformARB<2>(dataItem->surfacePropShaderUniformLocations[0],1,cellSize);
 	glActiveTextureARB(GL_TEXTURE0_ARB);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);

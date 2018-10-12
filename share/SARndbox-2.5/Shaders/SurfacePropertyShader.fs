@@ -37,6 +37,8 @@ void main()
     float slopeY = 2.0*x1 + x2 + x3 +2.0*x4 - 6.0*avX;
     slopeX = slopeX/(10.0*dx);
     slopeY = slopeY/(10.0*dy);
+    slopeX = atan(slopeX,1.0);
+    slopeY = atan(slopeY,1.0);
     
 
     //using least squares
