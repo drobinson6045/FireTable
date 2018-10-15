@@ -489,7 +489,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
 	GLfloat* w=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
-	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_R32F,size[0],size[1],0,GL_RGB,GL_FLOAT,w);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,w);
 	delete[] w;
 	}
 
@@ -645,7 +645,6 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->bathymetryShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->bathymetryShader,"newBathymetrySampler");
 	dataItem->bathymetryShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->bathymetryShader,"quantitySampler");
 	}
-	
 	/* Create the water adaptation shader: */
 	{
 	GLhandleARB vertexShader=glCompileVertexShaderFromString(vertexShaderSource);
@@ -710,6 +709,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	dataItem->eulerStepShaderUniformLocations[7]=glGetUniformLocationARB(dataItem->eulerStepShader,"cellSize");
 
 	}
+	
 	/* Create the surfaceProperty shader: */
 	{
 	GLhandleARB vertexShader=glCompileVertexShaderFromString(vertexShaderSource);
@@ -721,6 +721,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
         dataItem->surfacePropShaderUniformLocations[1]=glGetUniformLocationARB(dataItem->surfacePropShader,"bathymetrySampler");//NOWATER
         dataItem->surfacePropShaderUniformLocations[2]=glGetUniformLocationARB(dataItem->surfacePropShader,"fireSampler");//NOWATER
 	}
+
         std::cout<<"Surface Shader Complete"<<std::endl;//NOWATER  
 
 	

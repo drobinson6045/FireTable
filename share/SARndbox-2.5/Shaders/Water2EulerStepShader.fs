@@ -102,11 +102,11 @@ void main()
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
               //Calctheta 
-              float theta = groundState.g - cAngle;  //simple case groundState.g -> wD
+              float theta = groundState.g-cAngle;  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
-              float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += fire.r/8.0/dist;//spread/distances;
+              float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta-cAngle));
+              cont += fire.r/8.0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
@@ -121,8 +121,8 @@ void main()
 	if(curFire.g>=tb){
 	  cTime = -10.0;
         }
-	float slopeA = texture2DRect(surfaceSampler,gl_FragCoord.xy).r;
-	gl_FragColor = vec4(slopeA,newTime,cTime,0.0);
+	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
+	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
 	
 
       }

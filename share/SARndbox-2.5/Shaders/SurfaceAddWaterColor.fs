@@ -164,7 +164,7 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	//bath values from surface float level = 1.17549428075736428990E-38;
 	float level = 0.0;
         /* Check if the surface is under water: */
-	/*if(fireLevel>1.0){
+	if(fireLevel>1.0){
           
           // float colorW=max(snoise(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Simple noise function
           // float colorW=max(turb(vec3(fragCoord*0.05,waterAnimationTime*0.25)),0.0); // Turbulence noise
@@ -189,15 +189,15 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	    }
           baseColor=mix(baseColor,waterColor,opacity);//min(waterLevel*waterOpacity,1.0));
 
-          }*/
-	if(fireLevel>=level){
+          }
+	/*if(fireLevel>=level){
 	  //baseColor = mix(baseColor,vec4(0.0,1.0,0.0,1.0),sqrt(fireLevel*fireLevel));
 	  baseColor = vec4(0.0,0.0,1.0,1.0);
 	}
 	if(fireLevel<level){
           //baseColor = mix(baseColor,vec4(0.0,0.0,1.0,1.0),sqrt(fireLevel*fireLevel)); 
 	  baseColor = vec4(0.0,1.0,0.0,1.0);
-	}
+	}*/
 	
         //if(0){
           /* Calculate the water color: */
