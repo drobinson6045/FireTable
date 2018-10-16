@@ -596,7 +596,6 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+3,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[0],0);
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+4,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1],0);
 
-
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	}
@@ -620,8 +619,11 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->waterFramebufferObject);
 	
 	/* Attach the water texture to the water frame buffer: */
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->waterTextureObject,0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[0],0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+1,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1],0);
+	GLenum drawBuffers[2]={GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};//NOWATER
+	glDrawBuffersARB(2,drawBuffers);
+	//NOWATERglDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 	glReadBuffer(GL_NONE);
 	}
 	
@@ -1170,8 +1172,9 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		
 		/* Set up and clear the water frame buffer: */
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->waterFramebufferObject);
+	        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(dataItem->currentFire));
 		glViewport(0,0,size[0],size[1]);
-		glClearColor(waterDeposit*stepSize,0.0f,0.0f,0.0f);
+		glClearColor(1.0f,0.0f,0.0f,0.0f);//was waterDeposit*stepSize for r NOWATER
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		/* Enable additive rendering: */
@@ -1200,11 +1203,13 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		Step 6: Update the conserved quantities based on the water texture.
 		*******************************************************************/
 		
+                //WaterTextureobject doesnt seem to be sampled
 		/* Set up the integration frame buffer to update the conserved quantities based on the water texture: */
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
 		glViewport(0,0,size[0],size[1]);
 		/* Set up the water update shader: */
+                
 		glUseProgramObjectARB(dataItem->waterShader);
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
