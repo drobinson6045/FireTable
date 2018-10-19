@@ -1159,7 +1159,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Update the current quantities: */
 	dataItem->currentQuantity=1-dataItem->currentQuantity;
-	if(waterDeposit!=0.0f||!renderFunctions.empty())
+	if(0)//NOWATERwaterDeposit!=0.0f||!renderFunctions.empty())
 		{
 		/* Save OpenGL state: */
 		GLfloat currentClearColor[4];
