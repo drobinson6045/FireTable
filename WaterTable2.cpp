@@ -422,7 +422,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	{
 	/* Create the cell-centered quantity state textures: */
 	glGenTextures(3,dataItem->quantityTextureObjects);
-	GLfloat* q=makeBuffer(size[0],size[1],3,double(domain.min[2]),0.0,0.0);
+	GLfloat* q=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);//NOWATER was double(domain.min[2])
 	/*int begX, endX, begY, endY;
 	begX = 100;
 	endX = 400;
@@ -450,6 +450,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glGenTextures(2,dataItem->fireTextureObjects);
 	GLfloat* fb=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
         //NOWATER
+	
 	int begX, endX, begY, endY;
 	int cX = 150, cY = 250;
 	int rad = 25;
@@ -461,7 +462,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 
 		for(int j = begY; j<= endY; j++){
 			//if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
-				fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
+				//fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
 			//	}
 			}
 		}
@@ -1140,7 +1141,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glVertex2i(0,size[1]);
 	glEnd();*/
         dataItem->currentFire=1-dataItem->currentFire;//NOWATER
-	if(dryBoundary)
+	if(0)
 		{
 		/* Set up the boundary condition shader to enforce dry boundaries: */
 		glUseProgramObjectARB(dataItem->boundaryShader);
@@ -1176,12 +1177,12 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->waterFramebufferObject);
 	        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 		glViewport(0,0,size[0],size[1]);
-		glClearColor(1.0f,0.0f,0.0f,0.0f);//was waterDeposit*stepSize for r NOWATER
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.0f,1.0f,0.0f,0.0f);//was waterDeposit*stepSize for r NOWATER
+		//glClear(GL_COLOR_BUFFER_BIT);
 		
 		/* Enable additive rendering: */
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE,GL_ONE);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_ONE,GL_ONE);
 		
 		/* Set up the water adding shader: */
 		glUseProgramObjectARB(dataItem->waterAddShader);
@@ -1189,9 +1190,9 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		glUniform1fARB(dataItem->waterAddShaderUniformLocations[1],stepSize);
 		
 		/* Bind the water texture: */
-		glActiveTextureARB(GL_TEXTURE0_ARB);
-		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->waterTextureObject);
-		glUniform1iARB(dataItem->waterAddShaderUniformLocations[2],0);
+		//glActiveTextureARB(GL_TEXTURE0_ARB);
+		//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->waterTextureObject);
+		//glUniform1iARB(dataItem->waterAddShaderUniformLocations[2],0);
 		
 		/* Call all render functions: */
 		for(std::vector<const AddWaterFunction*>::const_iterator rfIt=renderFunctions.begin();rfIt!=renderFunctions.end();++rfIt)

@@ -299,7 +299,7 @@ void Sandbox::addWater(GLContextData& contextData) const
 		x.normalize();
 		y.normalize();
 		
-		glVertexAttrib1fARB(1,rainStrength/waterSpeed);
+		glVertexAttrib1fARB(1,1.0);//rainStrength/waterSpeed);
 		for(HandExtractor::HandList::const_iterator hIt=handExtractor->getLockedExtractedHands().begin();hIt!=handExtractor->getLockedExtractedHands().end();++hIt)
 			{
 			/* Render a rain disk approximating the hand: */
@@ -307,7 +307,8 @@ void Sandbox::addWater(GLContextData& contextData) const
 			for(int i=0;i<32;++i)
 				{
 				Scalar angle=Scalar(2)*Math::Constants<Scalar>::pi*Scalar(i)/Scalar(32);
-				glVertex(hIt->center+x*(Math::cos(angle)*hIt->radius*0.75)+y*(Math::sin(angle)*hIt->radius*0.75));
+				glVertex(hIt->center+x*(Math::cos(angle)*0.5)+y*(Math::sin(angle)*0.5));//NOWATER
+				//glVertex(hIt->center+x*(Math::cos(angle)*hIt->radius*0.75)+y*(Math::sin(angle)*hIt->radius*0.75));
 				}
 			glEnd();
 			}

@@ -77,7 +77,7 @@ void main()
         //Get current cell quantities for fire
         vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
         //fire from hand detection
-        float handFire = texture2DRect(quantitySampler,gl_FragCoord.xy).r;
+        float handFire = texture2DRect(quantitySampler,gl_FragCoord.xy).g;
 	float burnTime = texture2DRect(fireSampler,gl_FragCoord.xy).g;
 	float newTime = curFire.g;
         //Arrays that need fixing
