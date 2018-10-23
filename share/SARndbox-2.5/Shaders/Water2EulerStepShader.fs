@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
    
 uniform float stepSize;
 //uniform float attenuation;
-//uniform sampler2DRect quantitySampler;
+uniform sampler2DRect quantitySampler;
 //uniform sampler2DRect derivativeSampler;
 //uniform sampler2DRect bathymetrySampler;//NOWATER
 uniform sampler2DRect fireSampler;//NOWATER
@@ -76,6 +76,8 @@ void main()
         float cTime = 10.0;
         //Get current cell quantities for fire
         vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
+        //fire from hand detection
+        float handFire = texture2DRect(quantitySampler,gl_FragCoord.xy).r;
 	float burnTime = texture2DRect(fireSampler,gl_FragCoord.xy).g;
 	float newTime = curFire.g;
         //Arrays that need fixing
@@ -113,6 +115,8 @@ void main()
           }
 	  curFire.r+= cont*stepSize;
 	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
+          //add fire from hand Ignition
+          curFire.r += handFire;
 	  if(curFire.r>= 1.0){
 	    newTime +=  stepSize;
 	    }

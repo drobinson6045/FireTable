@@ -619,11 +619,11 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->waterFramebufferObject);
 	
 	/* Attach the water texture to the water frame buffer: */
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[0],0);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+1,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1],0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[0],0);
+	/*glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT+1,GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1],0);
 	GLenum drawBuffers[2]={GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};//NOWATER
-	glDrawBuffersARB(2,drawBuffers);
-	//NOWATERglDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	glDrawBuffersARB(2,drawBuffers);*/
+	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 	glReadBuffer(GL_NONE);
 	}
 	
@@ -1063,9 +1063,9 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glUniformARB(dataItem->eulerStepShaderUniformLocations[0],stepSize);
 
 	//glUniformARB(dataItem->eulerStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
-	//glActiveTextureARB(GL_TEXTURE0_ARB);
-	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[dataItem->currentQuantity]);
-	//glUniform1iARB(dataItem->eulerStepShaderUniformLocations[2],0);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->quantityTextureObjects[0]);
+	glUniform1iARB(dataItem->eulerStepShaderUniformLocations[2],0);
 	//glActiveTextureARB(GL_TEXTURE1_ARB);
 	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	//glUniform1iARB(dataItem->eulerStepShaderUniformLocations[3],1);
@@ -1073,12 +1073,12 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
         //glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
         //glUniform1iARB(dataItem->eulerStepShaderUniformLocations[4],2);//NOWATER Attaching Bathymetry Texture
         
-	glActiveTextureARB(GL_TEXTURE0_ARB);//NOWATER
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1-dataItem->currentFire]);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],0);//NOWATER Attaching Fire Texture
 	glActiveTextureARB(GL_TEXTURE1_ARB);//NOWATER
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[1-dataItem->currentFire]);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[5],1);//NOWATER Attaching Fire Texture
+	glActiveTextureARB(GL_TEXTURE2_ARB);//NOWATER
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject);//NOWATER
-        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[6],1);//NOWATER
+        glUniform1iARB(dataItem->eulerStepShaderUniformLocations[6],2);//NOWATER
 
 	glUniformARB<2>(dataItem->eulerStepShaderUniformLocations[7],1,cellSize);
 
@@ -1102,12 +1102,13 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	*********************************************************************/
 
 	/* Set up the Runge-Kutta step integration frame buffer: */
+        /*
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
-	glViewport(0,0,size[0],size[1]);
+	glViewport(0,0,size[0],size[1]);NOWATER*/
 	/* Set up the Runge-Kutta integration step shader: */
 	// NOWATER
-	glUseProgramObjectARB(dataItem->rungeKuttaStepShader);
+	//glUseProgramObjectARB(dataItem->rungeKuttaStepShader);
 	/*glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[0],stepSize);
 	glUniformARB(dataItem->rungeKuttaStepShaderUniformLocations[1],Math::pow(attenuation,stepSize));
 	glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -1120,6 +1121,8 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->derivativeTextureObject);
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[4],2);*/
 
+	/* Run the Runge-Kutta integration step: */
+        /*
 	glActiveTextureARB(GL_TEXTURE0_ARB);
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);//NOWATER
         glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[6],0);//NOWATER
@@ -1129,14 +1132,13 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 
 	glUniform1iARB(dataItem->rungeKuttaStepShaderUniformLocations[5],1);//NOWATER
 	
-	/* Run the Runge-Kutta integration step: */
 	
 	glBegin(GL_QUADS);
 	glVertex2i(0,0);
 	glVertex2i(size[0],0);
 	glVertex2i(size[0],size[1]);
 	glVertex2i(0,size[1]);
-	glEnd();
+	glEnd();*/
         dataItem->currentFire=1-dataItem->currentFire;//NOWATER
 	if(dryBoundary)
 		{
@@ -1159,7 +1161,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	
 	/* Update the current quantities: */
 	dataItem->currentQuantity=1-dataItem->currentQuantity;
-	if(0)//NOWATERwaterDeposit!=0.0f||!renderFunctions.empty())
+	if(waterDeposit!=0.0f||!renderFunctions.empty())
 		{
 		/* Save OpenGL state: */
 		GLfloat currentClearColor[4];
@@ -1172,7 +1174,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		
 		/* Set up and clear the water frame buffer: */
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->waterFramebufferObject);
-	        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(dataItem->currentFire));
+	        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 		glViewport(0,0,size[0],size[1]);
 		glClearColor(1.0f,0.0f,0.0f,0.0f);//was waterDeposit*stepSize for r NOWATER
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -1205,11 +1207,13 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		
                 //WaterTextureobject doesnt seem to be sampled
 		/* Set up the integration frame buffer to update the conserved quantities based on the water texture: */
+                /*
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->integrationFramebufferObject);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT+(1-dataItem->currentQuantity));
-		glViewport(0,0,size[0],size[1]);
+		glViewport(0,0,size[0],size[1]);*/
 		/* Set up the water update shader: */
                 
+                /*
 		glUseProgramObjectARB(dataItem->waterShader);
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
@@ -1219,16 +1223,17 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 		glUniform1iARB(dataItem->waterShaderUniformLocations[1],1);
 		glActiveTextureARB(GL_TEXTURE2_ARB);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->waterTextureObject);
-		glUniform1iARB(dataItem->waterShaderUniformLocations[2],2);
+		glUniform1iARB(dataItem->waterShaderUniformLocations[2],2);*/
 		/* Run the water update: */
+                /*
 		glBegin(GL_QUADS);
 		glVertex2i(0,0);
 		glVertex2i(size[0],0);
 		glVertex2i(size[0],size[1]);
 		glVertex2i(0,size[1]);
-		glEnd();
+		glEnd();*/
 		/* Update the current quantities: */
-		dataItem->currentQuantity=1-dataItem->currentQuantity;
+		//dataItem->currentQuantity=1-dataItem->currentQuantity;
                 
 		}
 	
