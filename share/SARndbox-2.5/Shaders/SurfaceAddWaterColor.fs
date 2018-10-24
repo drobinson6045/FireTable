@@ -180,12 +180,13 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
             //vec4 waterColor=vec4(1.0,0.0,0.0,1.0);
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
 	    //}
+	  opacity = sin(fireLevel/5.0*3.1415/2.8);
 	  if(fireTime>4.0){
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
 	    waterColor.r =0.0;
 	    waterColor.g = 0.0;
             waterColor.b = 0.0;
-	    opacity+=0.4;
+	    opacity=0.6;
 	    }
           baseColor=mix(baseColor,waterColor,opacity);//min(waterLevel*waterOpacity,1.0));
 
