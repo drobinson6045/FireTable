@@ -114,12 +114,15 @@ void main()
             }
           }
 	  curFire.r+= cont*stepSize;
-	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
-          //add fire from hand Ignition
+	           
+	  //add fire from hand Ignition
           curFire.r += handFire;
 	  if(curFire.r>= 1.0){
 	    newTime +=  stepSize;
 	    }
+	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
+          if(curFire.r<-3.0){curFire.r=-3.0;}//Set a min value
+
 	  }
         //if fuel in cell is consumed
 	if(curFire.g>=tb){
