@@ -64,7 +64,7 @@ void main()
         float wS = 3.0; //Wind-Speed (m/s)  might need to be cm/s
         float beta = 1.5; //values: 1.12(litter) 0.12(grass) 0.19(shrub) 
         float sigma = 8000.0; //values: 5258(litter) 12781(grass) 6307(shrub)
-        float R0 = 1.0;  //max spread rate on flat land
+        float R0 = 0.5*1.0/8.0;  //max spread rate on flat land
         //Calculate constants
         float C = 7.47*exp(-0.8711*pow(sigma,0.55));
         float B = 0.15988*pow(sigma,0.54);
@@ -108,7 +108,7 @@ void main()
               float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta-cAngle));
-              cont += fire.r/8.0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
+              cont += fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
