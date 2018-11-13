@@ -36,11 +36,17 @@ float modI(float a,float b) {
     return floor(m+0.5);
 }
 
+float calcEtaM(float mF, float mX) {
+    float ratio = mF/mX;
+    float etaM = 1.0 - 2.59*ratio + 5.11*pow(ratio,2.0) - 3.52*pow(ratio,3.0);
+    return etaM;
+}
+
 void main()
 	{
         /*Calculate phiS, phiW, and EBar
-            phiS = 5.275*Beta^(-0.3)*tan(phi^2)
-            phiW = C*(0.3048U)^B*(beta/betaOpt)^(-E)
+            phiS = 5.275*Beta^(-0.3)*tan(phi)^2
+            phiW = C*(3.281U)^B*(beta/betaOpt)^(-E)
             -requires C,B, and E
               C = 7.47e^(-0.8711*sigma^0.55)
               B = 0.15988*sigma^0.54
@@ -57,23 +63,49 @@ void main()
         float dd = sqrt(2.0)*cellSize.x;//diagonal grid distance to next cell center
         //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
-        //Parameters:
         float deltaDir = 0.25*PI;
+        /* Input Parameters: 
+            sigma (SAV) [1/cm]
+            wn (net fuel loading) [kg/m^2]
+            h (fuel heat content) [kJ/kg]
+            beta (Packing Ratio) [%]
+            mf (fuel moisture) [%]
+            mx (fuel moisture of extinction [%]
+            rhoB (ovendry bulk density) [kg/m^3] --->Ratio of these is beta
+            rhoP (fuel particle density) [kg/m^3]--/ 
+            delta (fuel depth) [m]
+            se (fuel effective mineral content) [%]    defines etaS
+            U/Ueq (midflame wind speed) [m/min]
+        */
+
         float tb = 4.0; //burn-out time
+        
         float wD = PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 3.0; //Wind-Speed (m/s)  might need to be cm/s
-        float beta = 1.5; //values: 1.12(litter) 0.12(grass) 0.19(shrub) 
-        float sigma = 8000.0; //values: 5258(litter) 12781(grass) 6307(shrub)
-        float R0 = 0.5*1.0/8.0;  //max spread rate on flat land
-        //Calculate constants
-        float C = 7.47*exp(-0.8711*pow(sigma,0.55));
-        float B = 0.15988*pow(sigma,0.54);
-        float E = 0.715*exp(-0.01094*sigma);
-        float LW = 0.936*exp(50.5*wS)+0.461*exp(-30.5*wS);
-        float EBar = sqrt(1.0-pow(LW,-2.0));
-        float phiW = C*pow(0.3048*wS,B)*pow(beta,-E); //Constant for now  [m/s]
-        float cont = 0.0;
-        float cTime = 10.0;
+        float wS = 120.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        //in reality is background wind but using as place holder for midflame wind
+
+        /*GR4 Fuel Properties
+          sigma = 1826 * 0.03281
+          wn = 0.25 * 0.22417 (1-hr)
+          wn = 1.90 * 0.22417 (live herb)
+          beta = 0.00154
+          sigma = 2000 * 0.03281(dead 1-hr)
+          mx = 0.15
+          h = 8000 * 2.32601
+          delta = 2.0 * 0.3048 [cm]
+        */
+        //mineral content parameters missing
+
+        //Fuel parameters
+        float mF = 0.05;   //Set moisture content of fuel  (should be dynamic)
+        float beta = 0.00154; //values: 1.12(litter) 0.12(grass) 0.19(shrub) 
+        float sigma = 1826.0*0.03281; //values: 5258(litter) 12781(grass) 6307(shrub)
+        float wn = 0.25 * 0.22417;
+        float mX = 0.15;
+        float h = 8000.0 * 2.32601;
+        float delta = 2.0 * 0.3048;
+
+
         //Get current cell quantities for fire
         vec3 curFire = texture2DRect(fireSampler,gl_FragCoord.xy).rgb;
         //fire from hand detection
@@ -86,6 +118,38 @@ void main()
 	float directions = 13.0*PI/16.0;
 	float distances = cellSize.x;
 	float maxtime;
+
+        //Calculate R0
+        float A = 6.7229*pow(sigma,0.1)-7.27;
+        float gamPrime = pow(0.0591 + 2.926*pow(sigma,-1.5) ,-1.0);
+        float betaOp = 0.20395*pow(sigma,-0.8189);
+        gamPrime = gamPrime*pow(beta/betaOp*exp(1.0-beta/betaOp),A);
+        float etaM = calcEtaM(mF,mX);
+        float etaS = 1.0;  //No fuel effective mineral content fraction
+        float Ir = gamPrime*wn*h*etaM*etaS;
+
+        float fluxRatio = pow(192.0+7.9095*sigma,-1.0)*exp((0.792+3.57597*pow(sigma,0.5))*(beta+0.1));
+        float rhoB = 100.0*wn/delta; 
+        float eps = exp(-4.528/sigma);
+        float Qig = 581.0 + 2594.0*mF;
+
+        float R0 = Ir*fluxRatio/(rhoB*eps*Qig);
+
+        //Calculate phiW
+        float C = 7.47*exp(-0.8711*pow(sigma,0.55);
+        float B = 0.15988*pow(sigma,0.54);
+        float E = 0.715*exp(-0.01094*sigma);
+        float phiW = C*pow(3.281*wS,B)*pow(beta/betaOP,-E);
+
+        //Calculate EBar
+        float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
+        float EBar = sqrt(1.0-pow(LW,-2.0));
+
+
+        float cont = 0.0;
+        float cTime = 10.0;
+
+
         //if cell isn't burned out
 	if(curFire.g < tb){
 	  
@@ -99,16 +163,16 @@ void main()
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
-            //groundState gives garbage now   surface properties texture not being filled yet
 	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
               //Calctheta 
-              float theta = groundState.g-cAngle;  //simple case average of gradient directionand wind
-              float phiS = 5.275*pow(beta,-0.3)*tan(pow(groundState.r,2.0));
+              float spreadAngle = (groundState.g + wD)/2.0; average of wind direction an gradient direction
+              float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
+              float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
               float eR = R0*(1.0+phiS+phiW);
-              float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta-cAngle));
-              cont += fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
+              float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
+              cont += spread/dist/8.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
