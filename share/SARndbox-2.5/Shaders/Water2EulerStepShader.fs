@@ -60,11 +60,14 @@ void main()
         /*float directions[8] = {0.0,PI*0.25,PI*0.5,3.0*PI*0.25,PI,5.0*PI*0.25,3.0*PI*0.5,7.0*PI*0.25};
         float shiftX[8] = {0.51,0.51,0.0,-0.51,-0.51,-0.51,0.0,0.51}; 
         float shiftY[8] = {0.0,0.51,0.51,0.51,0.0,-0.51,-0.51,-0.51};*/ 
-        float dd = sqrt(2.0)*cellSize.x;//diagonal grid distance to next cell center
+        
+	float dd = sqrt(2.0)*cellSize.x;//diagonal grid distance to next cell center
         //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
-        float deltaDir = 0.25*PI;
-        /* Input Parameters: 
+        float deltaDir = PI/4.0;
+        
+
+	/* Input Parameters: 
             sigma (SAV) [1/cm]
             wn (net fuel loading) [kg/m^2]
             h (fuel heat content) [kJ/kg]
@@ -78,10 +81,10 @@ void main()
             U/Ueq (midflame wind speed) [m/min]
         */
 
-        float tb = 4.0; //burn-out time
+        float tb = 60.0; //burn-out time
         
-        float wD = PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 120.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wD = 0.0;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
+        float wS = 800.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -136,14 +139,14 @@ void main()
         float R0 = Ir*fluxRatio/(rhoB*eps*Qig);
 
         //Calculate phiW
-        float C = 7.47*exp(-0.8711*pow(sigma,0.55);
+        float C = 7.47*exp(-0.8711*pow(sigma,0.55));
         float B = 0.15988*pow(sigma,0.54);
         float E = 0.715*exp(-0.01094*sigma);
-        float phiW = C*pow(3.281*wS,B)*pow(beta/betaOP,-E);
+        float phiW = C*pow(3.281*wS,B)*pow(beta/betaOp,-E);
 
         //Calculate EBar
         float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
-        float EBar = sqrt(1.0-pow(LW,-2.0));
+        float EBar = 0.6;//sqrt(1.0-pow(LW,-2.0));
 
 
         float cont = 0.0;
@@ -167,7 +170,7 @@ void main()
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
               //Calctheta 
-              float spreadAngle = (groundState.g + wD)/2.0; average of wind direction an gradient direction
+              float spreadAngle = groundState.g;//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
               float eR = R0*(1.0+phiS+phiW);
@@ -184,12 +187,12 @@ void main()
 	  if(curFire.r>= 1.0){
 	    newTime +=  stepSize;
 	    }
-	  if(curFire.r>5.0){curFire.r=5.0;}//Set a max value
+	  if(curFire.r>8.0){curFire.r=8.0;}//Set a max value
           if(curFire.r<-3.0){curFire.r=-3.0;}//Set a min value
 
 	  }
         //if fuel in cell is consumed
-	if(curFire.g>=tb){
+	if(curFire.g>=10*tb){
 	  cTime = -10.0;
         }
 	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
