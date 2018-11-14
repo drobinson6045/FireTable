@@ -83,8 +83,8 @@ void main()
 
         float tb = 60.0; //burn-out time
         
-        float wD = 0.0;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 800.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wD = 0.5*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
+        float wS = 1500.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -146,7 +146,7 @@ void main()
 
         //Calculate EBar
         float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
-        float EBar = 0.6;//sqrt(1.0-pow(LW,-2.0));
+        float EBar = 0.9;//sqrt(1.0-pow(LW,-2.0));
 
 
         float cont = 0.0;
@@ -170,7 +170,7 @@ void main()
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
               //Calctheta 
-              float spreadAngle = groundState.g;//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+              float spreadAngle = (groundState.r*groundState.g+wD*wS/1000.0)/(wS/1000.0+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
               float eR = R0*(1.0+phiS+phiW);
