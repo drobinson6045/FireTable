@@ -79,6 +79,7 @@ void main()
             delta (fuel depth) [m]
             se (fuel effective mineral content) [%]    defines etaS
             U/Ueq (midflame wind speed) [m/min]
+            MINERAL CONTENT NOT IMPLEMENTED
         */
 
         float tb = 60.0; //burn-out time
@@ -123,26 +124,26 @@ void main()
 	float maxtime;
 
         //Calculate R0
-        float A = 6.7229*pow(sigma,0.1)-7.27;
-        float gamPrime = pow(0.0591 + 2.926*pow(sigma,-1.5) ,-1.0);
-        float betaOp = 0.20395*pow(sigma,-0.8189);
-        gamPrime = gamPrime*pow(beta/betaOp*exp(1.0-beta/betaOp),A);
+        float A = 1.0/(4.239*pow(sigma,0.1)-7.27); 
+        float gamPrime = pow(sigma,1.5)/(1171.27+3.564*pow(sigma,1.5));
+        float betaOp = 3.348*pow(sigma,-0.8189);
+        gamPrime = gamPrime*pow(beta/betaOp,A)*exp((1.0-beta/betaOp)*A);
         float etaM = calcEtaM(mF,mX);
         float etaS = 1.0;  //No fuel effective mineral content fraction
         float Ir = gamPrime*wn*h*etaM*etaS;
 
-        float fluxRatio = pow(192.0+7.9095*sigma,-1.0)*exp((0.792+3.57597*pow(sigma,0.5))*(beta+0.1));
-        float rhoB = 100.0*wn/delta; 
-        float eps = exp(-4.528/sigma);
-        float Qig = 581.0 + 2594.0*mF;
+        float fluxRatio = pow(192.0+0.0791*sigma,-1.0)*exp((0.792+0.376*pow(sigma,0.5))*(beta+0.1));
+        float rhoB = wn/delta; 
+        float eps = exp(-4527.56/sigma);
+        float Qig = 522.0 + 2332.0*mF;
 
         float R0 = Ir*fluxRatio/(rhoB*eps*Qig);
 
         //Calculate phiW
-        float C = 7.47*exp(-0.8711*pow(sigma,0.55));
-        float B = 0.15988*pow(sigma,0.54);
-        float E = 0.715*exp(-0.01094*sigma);
-        float phiW = C*pow(3.281*wS,B)*pow(beta/betaOp,-E);
+        float C = 7.47*exp(-0.0693*pow(sigma,0.55));
+        float B = 0.0133*pow(sigma,0.54);
+        float E = 0.715*exp(-0.0001079*sigma);
+        float phiW = C*pow(wS,B)*pow(beta/betaOp,-E);
 
         //Calculate EBar
         float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
@@ -166,6 +167,7 @@ void main()
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
+            // groundState = <tan(phi), 
 	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
