@@ -103,11 +103,11 @@ void main()
         //Fuel parameters
         float mF = 0.05;   //Set moisture content of fuel  (should be dynamic)
         float beta = 0.00154; //values: 1.12(litter) 0.12(grass) 0.19(shrub) 
-        float sigma = 1826.0*0.03281; //values: 5258(litter) 12781(grass) 6307(shrub)
-        float wn = 0.25 * 0.22417;
+        float sigma = 65.0*100.0; //values: 5258(litter) 12781(grass) 6307(shrub)
+        float wn = 3.25 * 0.22417;
         float mX = 0.15;
         float h = 8000.0 * 2.32601;
-        float delta = 2.0 * 0.3048/100.0;
+        float delta = 2.0;
 
 
         //Get current cell quantities for fire
@@ -129,10 +129,10 @@ void main()
         float betaOp = 3.348*pow(sigma,-0.8189);
         gamPrime = gamPrime*pow(beta/betaOp,A)*exp((1.0-beta/betaOp)*A);
         float etaM = calcEtaM(mF,mX);
-        float etaS = 1.0;  //No fuel effective mineral content fraction
+        float etaS = 0.0555;  //No fuel effective mineral content fraction
         float Ir = gamPrime*wn*h*etaM*etaS;
 
-        float fluxRatio = pow(192.0+0.0791*sigma,-1.0)*exp((0.792+0.376*pow(sigma,0.5))*(beta+0.1));
+        float fluxRatio = pow(192.0+0.0791*sigma,-1.0)*exp(pow(0.792+0.376*sigma,0.5)*(beta+0.1));
         float rhoB = wn/delta; 
         float eps = exp(-4527.56/sigma);
         float Qig = 522.0 + 2332.0*mF;
@@ -146,7 +146,7 @@ void main()
         float phiW = C*pow(wS,B)*pow(beta/betaOp,-E);
 
         //Calculate EBar
-        float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
+        float LW = 0.936*exp(50.5*wS/1000.0)+0.461*exp(-30.5*wS/1000.0)-0.397;
         float EBar = 0.5;//sqrt(1.0-pow(LW,-2.0));
 
 
@@ -155,14 +155,13 @@ void main()
 
 
         //if cell isn't burned out
-	if(curFire.g < tb){
+	if(curFire.g < tb && curFire.g >= 0.0){
 	  
 	  float iter = 0.0;
           for(int i=0; i<8; i++){          
          
 	    // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
             float cAngle = deltaDir*i;
-	    iter+= i;
             float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
@@ -175,12 +174,13 @@ void main()
               float spreadAngle = (groundState.r*groundState.g+wD*wS/1000.0)/(wS/1000.0+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
-              float eR = R0;//*(1.0+phiS+phiW);
+              float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
               cont += spread/dist/8.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
+	    iter += 1.0;
           }
 	  curFire.r+= cont*stepSize;
 	           
@@ -190,12 +190,12 @@ void main()
 	    newTime +=  stepSize;
 	    }
 	  if(curFire.r>8.0){curFire.r=8.0;}//Set a max value
-          if(curFire.r<-3.0){curFire.r=-3.0;}//Set a min value
+          if(curFire.r<-1000.0){curFire.r=-1000.0;}//Set a min value
 
 	  }
         //if fuel in cell is consumed
-	if(curFire.g>=10*tb){
-	  cTime = -10.0;
+	if(curFire.g>=tb){
+	  cTime = -10.0;//mark that fuel is consumed by negative time
         }
 	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
 	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
