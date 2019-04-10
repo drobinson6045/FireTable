@@ -448,9 +448,10 @@ void WaterTable2::initContext(GLContextData& contextData) const
         {
 	/* Create the cell-centered fire state texture: */
 	glGenTextures(2,dataItem->fireTextureObjects);
-	GLfloat* fb=makeBuffer(size[0],size[1],3,0.0,0.0,0.0);
+	GLfloat* fb=makeBuffer(size[0],size[1],4,0.0,0.0,0.0,0.0);
         //NOWATER
 	
+        /*
 	int begX, endX, begY, endY;
 	int cX = 150, cY = 250;
 	int rad = 25;
@@ -466,7 +467,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
 			//	}
 			}
 		}
-        
+        */
     	std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER
 	for(int i=0;i<2;++i){
           glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);
@@ -474,7 +475,7 @@ void WaterTable2::initContext(GLContextData& contextData) const
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
           glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
-          glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGB32F,size[0],size[1],0,GL_RGB,GL_FLOAT,fb);
+          glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA32F,size[0],size[1],0,GL_RGBA,GL_FLOAT,fb);
         }
 		
 	delete[] fb;
