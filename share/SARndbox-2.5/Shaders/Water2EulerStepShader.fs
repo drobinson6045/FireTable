@@ -82,9 +82,9 @@ void main()
             MINERAL CONTENT NOT IMPLEMENTED
         */
 
-        float tb = 60.0; //burn-out time
+        float tb = 2400.0; //burn-out time in seconds
         
-        float wD = 0.5*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
+        float wD = 0.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
         float wS = 1.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
@@ -167,16 +167,16 @@ void main()
             vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             // groundState = <tan(phi), 
-	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
+	    if(fire.r>=1.0 && fire.g <tb && fire.g>=0.0){ //Not going to burnout and burning  Need to handle burnout
 
-              float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
+              float dist = 100.0*cellSize.x*pow(sqrt(2.0),modI(iter,2.0));//100.0 factor for scale to 22m grid
               //Calctheta 
-              float spreadAngle = (groundState.r*groundState.g+wD*wS/1000.0)/(wS/1000.0+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+              float spreadAngle = (groundState.r*groundState.g+wD*wS)/(wS+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += spread/dist/8.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
+              cont += spread/dist/16.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
@@ -192,13 +192,13 @@ void main()
 	  if(curFire.r>8.0){curFire.r=8.0;}//Set a max value
           if(curFire.r<-1000.0){curFire.r=-1000.0;}//Set a min value
 
-	  }
+	}
         //if fuel in cell is consumed
 	if(curFire.g>=tb){
-	  cTime = -10.0;//mark that fuel is consumed by negative time
+	  newTime = -10.0;//mark that fuel is consumed by negative time
         }
 	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
-	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
+	gl_FragColor = vec4(curFire.r,newTime,slope.r,5.0);
 	
 
       }
