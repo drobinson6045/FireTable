@@ -79,12 +79,13 @@ void main()
             delta (fuel depth) [m]
             se (fuel effective mineral content) [%]    defines etaS
             U/Ueq (midflame wind speed) [m/min]
+            MINERAL CONTENT NOT IMPLEMENTED
         */
 
         float tb = 60.0; //burn-out time
-        float convScaling = 1.0;
+        
         float wD = 0.5*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 10.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wS = 1.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -102,11 +103,11 @@ void main()
         //Fuel parameters
         float mF = 0.05;   //Set moisture content of fuel  (should be dynamic)
         float beta = 0.00154; //values: 1.12(litter) 0.12(grass) 0.19(shrub) 
-        float sigma = 1826.0*0.03281; //values: 5258(litter) 12781(grass) 6307(shrub)
-        float wn = 0.25 * 0.22417;
+        float sigma = 65.0*100.0; //values: 5258(litter) 12781(grass) 6307(shrub)
+        float wn = 3.25 * 0.22417;
         float mX = 0.15;
         float h = 8000.0 * 2.32601;
-        float delta = 2.0 * 0.3048;
+        float delta = 2.0;
 
 
         //Get current cell quantities for fire
@@ -123,58 +124,52 @@ void main()
 	float maxtime;
 
         //Calculate R0
-        float A = 6.7229*pow(sigma,0.1)-7.27;
-        float gamPrime = pow(0.0591 + 2.926*pow(sigma,-1.5) ,-1.0);
-        float betaOp = 0.20395*pow(sigma,-0.8189);
-        gamPrime = gamPrime*pow(beta/betaOp*exp(1.0-beta/betaOp),A);
+        float A = 1.0/(4.239*pow(sigma,0.1)-7.27); 
+        float gamPrime = pow(sigma,1.5)/(1171.27+3.564*pow(sigma,1.5));
+        float betaOp = 3.348*pow(sigma,-0.8189);
+        gamPrime = gamPrime*pow(beta/betaOp,A)*exp((1.0-beta/betaOp)*A);
         float etaM = calcEtaM(mF,mX);
-        float etaS = 1.0;  //No fuel effective mineral content fraction
+        float etaS = 0.0555;  //No fuel effective mineral content fraction
         float Ir = gamPrime*wn*h*etaM*etaS;
 
-        float fluxRatio = pow(192.0+7.9095*sigma,-1.0)*exp((0.792+3.57597*pow(sigma,0.5))*(beta+0.1));
-        float rhoB = 100.0*wn/delta; 
-        float eps = exp(-4.528/sigma);
-        float Qig = 581.0 + 2594.0*mF;
+        float fluxRatio = pow(192.0+0.0791*sigma,-1.0)*exp(pow(0.792+0.376*sigma,0.5)*(beta+0.1));
+        float rhoB = wn/delta; 
+        float eps = exp(-4527.56/sigma);
+        float Qig = 522.0 + 2332.0*mF;
 
         float R0 = Ir*fluxRatio/(rhoB*eps*Qig);
 
         //Calculate phiW
-        float C = 7.47*exp(-0.8711*pow(sigma,0.55));
-        float B = 0.15988*pow(sigma,0.54);
-        float E = 0.715*exp(-0.01094*sigma);
-        float phiW = C*pow(3.281*wS,B)*pow(beta/betaOp,-E);
+        float C = 7.47*exp(-0.0693*pow(sigma,0.55));
+        float B = 0.0133*pow(sigma,0.54);
+        float E = 0.715*exp(-0.0001079*sigma);
+        float phiW = C*pow(wS,B)*pow(beta/betaOp,-E);
 
         //Calculate EBar
-        float LW = 0.936*exp(50.5*wS/60.0)+0.461*exp(-30.5*wS/60.0)-0.397;
-        float EBar = 0.9;//sqrt(1.0-pow(LW,-2.0));
+        float LW = 0.936*exp(50.5*wS/1000.0)+0.461*exp(-30.5*wS/1000.0)-0.397;
+        float EBar = 0.5;//sqrt(1.0-pow(LW,-2.0));
 
 
         float cont = 0.0;
         float cTime = 10.0;
-        float convX = 0.0;
-        float convY = 0.0;
-        float convTheta = 0.0;
 
 
         //if cell isn't burned out
-	if(curFire.g < tb && curFire.g >=0.0){
+	if(curFire.g < tb && curFire.g >= 0.0){
 	  
 	  float iter = 0.0;
           for(int i=0; i<8; i++){          
          
 	    // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
             float cAngle = deltaDir*i;
-	    iter = i;
             float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
-            vec4 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgba;
+            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
-	    if(fire.r>=1.0 && fire.g <tb && fire.g >= 0.0){ //Not going to burnout and burning
+            // groundState = <tan(phi), 
+	    if(fire.r>=1.0 && fire.g <tb){ //Not going to burnout and burning  Need to handle burnout
 
               float dist = cellSize.x*pow(sqrt(2.0),modI(iter,2.0));
-              //Calculate convective sink contribution
-              convX += fire.r/dist*cos(cAngle);
-              convY += fire.r/dist*sin(cAngle);
               //Calctheta 
               float spreadAngle = (groundState.r*groundState.g+wD*wS/1000.0)/(wS/1000.0+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
@@ -182,41 +177,28 @@ void main()
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
               cont += spread/dist/8.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
-              //maxtime = dist/spread;//NEED MOD HERE
-              //if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
-            }//END burning cell sample
-            
-          }//END cell sampling
-          
-
-          //Add in fire quantity to current cell
+              maxtime = dist/spread;//NEED MOD HERE
+              if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
+            }
+	    iter += 1.0;
+          }
 	  curFire.r+= cont*stepSize;
-	  //update time if fire is burning in cell and not burntout
-	  if(curFire.r>= 1.0 && curFire.g >=0.0){
-	    newTime +=  stepSize;
-	  }
-
+	           
 	  //add fire from hand Ignition
           curFire.r += handFire;
-
+	  if(curFire.r>= 1.0){
+	    newTime +=  stepSize;
+	    }
 	  if(curFire.r>8.0){curFire.r=8.0;}//Set a max value
           if(curFire.r<-1000.0){curFire.r=-1000.0;}//Set a min value
-          
-          //Calculate convective sink strength and direction
-          if(convX != 0.0 || convY != 0.0){
-            convTheta = atan(convY,convX);//direction
-            convX = sqrt(pow(convX,2.0)+pow(convX,2.0));//magnitude
 
-          }
-
-
-	}//END cell centered not burned out
+	  }
         //if fuel in cell is consumed
 	if(curFire.g>=tb){
-	  newTime = -10.0;
+	  cTime = -10.0;//mark that fuel is consumed by negative time
         }
 	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
-	gl_FragColor = vec4(curFire.r,newTime,convX,convTheta);
+	gl_FragColor = vec4(curFire.r,newTime,cTime,0.0);
 	
 
       }
