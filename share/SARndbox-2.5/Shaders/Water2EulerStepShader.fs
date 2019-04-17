@@ -65,6 +65,7 @@ void main()
         //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
         float deltaDir = PI/4.0;
+        float convScaling = 1.0;  //scaling parameter to control convective sink strength
         
 
 	/* Input Parameters: 
@@ -152,7 +153,11 @@ void main()
 
         float cont = 0.0;
         float cTime = 10.0;
-
+        
+        //Convective sink terms
+        float convX=0.0;
+        float convY=0.0;
+        float convAngle=0.0;
 
         //if cell isn't burned out
 	if(curFire.g < tb && curFire.g >= 0.0){
@@ -164,32 +169,43 @@ void main()
             float cAngle = deltaDir*i;
             float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
-            vec3 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
+            vec4 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgba;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             // groundState = <tan(phi), 
 	    if(fire.r>=1.0 && fire.g <tb && fire.g>=0.0){ //Not going to burnout and burning  Need to handle burnout
 
               float dist = 100.0*cellSize.x*pow(sqrt(2.0),modI(iter,2.0));//100.0 factor for scale to 22m grid
               //Calctheta 
-              float spreadAngle = (groundState.r*groundState.g+wD*wS)/(wS+groundState.r);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+              convX += cos(cAngle)*fire.r/dist;
+              convY += sin(cAngle)*fire.r/dist;
+              if(groundState.r+wS+fire.g!=0.0){//if there is nonzero wind
+                float spreadAngle = (groundState.r*groundState.g+wD*wS+fire.g*fire.a)/(wS+groundState.r+fire.a);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+              }else{
+                float spreadAngle=0.0;
+              }
               float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
-              cont += spread/dist/16.0;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
+              cont += spread/dist;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE
               if(cTime > maxtime){cTime = maxtime;}//Keep track of timestep constraint 
             }
 	    iter += 1.0;
           }
 	  curFire.r+= cont*stepSize;
+          if(abs(convX)+abs(convY)!=0.0){//if nonzero sink wind
+            convAngle=atan(convY,convX);//sink wind angle
+            convX = sqrt(pow(convX,2.0)+pow(convY,2.0));//sink wind strength
+          }
+          
 	           
 	  //add fire from hand Ignition
           curFire.r += handFire;
 	  if(curFire.r>= 1.0){
 	    newTime +=  stepSize;
 	    }
-	  if(curFire.r>8.0){curFire.r=8.0;}//Set a max value
+	  if(curFire.r>1.0){curFire.r=1.0;}//Set a max value
           if(curFire.r<-1000.0){curFire.r=-1000.0;}//Set a min value
 
 	}
@@ -197,8 +213,8 @@ void main()
 	if(curFire.g>=tb){
 	  newTime = -10.0;//mark that fuel is consumed by negative time
         }
-	vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
-	gl_FragColor = vec4(curFire.r,newTime,slope.r,5.0);
+	//vec3 slope = texture2DRect(surfaceSampler,gl_FragCoord.xy).rgb;
+	gl_FragColor = vec4(curFire.r,newTime,convX,convAngle);
 	
 
       }
