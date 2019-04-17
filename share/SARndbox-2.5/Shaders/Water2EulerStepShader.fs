@@ -83,10 +83,10 @@ void main()
             MINERAL CONTENT NOT IMPLEMENTED
         */
 
-        float tb = 2400.0; //burn-out time in seconds
+        float tb = 65.0; //burn-out time in seconds
         
-        float wD = 0.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 1.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wD = 1.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
+        float wS = 2.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -144,11 +144,11 @@ void main()
         float C = 7.47*exp(-0.0693*pow(sigma,0.55));
         float B = 0.0133*pow(sigma,0.54);
         float E = 0.715*exp(-0.0001079*sigma);
-        float phiW = C*pow(wS,B)*pow(beta/betaOp,-E);
+        //float phiW = C*pow(wS,B)*pow(beta/betaOp,-E);
 
         //Calculate EBar
-        float LW = 0.936*exp(50.5*wS/1000.0)+0.461*exp(-30.5*wS/1000.0)-0.397;
-        float EBar = 0.5;//sqrt(1.0-pow(LW,-2.0));
+        //float LW = 0.936*exp(50.5*wS/1000.0)+0.461*exp(-30.5*wS/1000.0)-0.397;
+        //float EBar =sqrt(1.0-pow(LW,-2.0));
 
 
         float cont = 0.0;
@@ -167,24 +167,33 @@ void main()
          
 	    // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
             float cAngle = deltaDir*i;
-            float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
-            float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
+            float dx = 1.0*cos(cAngle);//*pow(sqrt(2.0),modI(iter,2.0));
+            float dy = 1.0*sin(cAngle);//*pow(sqrt(2.0),modI(iter,2.0));
             vec4 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgba;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
-            // groundState = <tan(phi), 
+            float spreadAngle = 0.0;
+	    // groundState = <tan(phi), 
 	    if(fire.r>=1.0 && fire.g <tb && fire.g>=0.0){ //Not going to burnout and burning  Need to handle burnout
 
-              float dist = 100.0*cellSize.x*pow(sqrt(2.0),modI(iter,2.0));//100.0 factor for scale to 22m grid
+              float dist = 100.0*cellSize.x;//*pow(sqrt(2.0),modI(iter,2.0));//100.0 factor for scale to 22m grid
               //Calctheta 
               convX += cos(cAngle)*fire.r/dist;
               convY += sin(cAngle)*fire.r/dist;
               if(groundState.r+wS+fire.g!=0.0){//if there is nonzero wind
-                float spreadAngle = (groundState.r*groundState.g+wD*wS+fire.g*fire.a)/(wS+groundState.r+fire.a);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+                spreadAngle = (4.0*groundState.r*groundState.g+wD*wS+fire.g*fire.a)/(wS+4.0*groundState.r+fire.a);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               }else{
-                float spreadAngle=0.0;
+                spreadAngle=0.0;
               }
-              float theta = spreadAngle-(cAngle+PI);  //simple case average of gradient directionand wind
+	      //Add all wind component wise
+	      float wsX = wS*cos(wD)+groundState.r*cos(groundState.g)+fire.g*cos(fire.a);
+              float wsY = wS*sin(wD)+groundState.r*sin(groundState.g)+fire.g*sin(fire.a);
+              wsX = sqrt(pow(wsX,2.0)+pow(wsY,2.0));//Wind strength
+              float LW = 0.936*exp(50.5*wsX/1000.0)+0.461*exp(-30.5*wsX/1000.0)-0.397;
+              float EBar =0.8;//sqrt(1.0-pow(LW,-2.0));
+
+	      float theta = (cAngle+PI)-spreadAngle;  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
+	      float phiW = C*pow(wsX,B)*pow(beta/betaOp,-E);
               float eR = R0*(1.0+phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
               cont += spread/dist;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;

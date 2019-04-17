@@ -1025,7 +1025,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	********************************************************************
 	*/
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
-	GLfloat stepSize = 30.0;//NOWATER
+	GLfloat stepSize = 4.0;//NOWATER
 	/*********************************************************************
 	Calculate Surface Properties 
 	*********************************************************************/

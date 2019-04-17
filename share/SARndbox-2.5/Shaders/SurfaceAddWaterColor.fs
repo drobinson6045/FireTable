@@ -158,8 +158,8 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	{
 	float fireLevel=texture2DRect(fireSampler,waterTexCoord).r;
 	float fireTime = texture2DRect(fireSampler,waterTexCoord).g;
-	float status = texture2DRect(fireSampler,waterTexCoord).b;
-	float sink = texture2DRect(fireSampler,waterTexCoord).a;
+	float sinkS = texture2DRect(fireSampler,waterTexCoord).b;
+	float sinkD = texture2DRect(fireSampler,waterTexCoord).a;
 	float opacity = 0.4;
 	float height = texture2DRect(bathymetrySampler,waterTexCoord).r;
 	//bath values from surface float level = 1.17549428075736428990E-38;
@@ -177,12 +177,19 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           // vec4 waterColor=vec4(0.0,0.0,1.0,1.0); // Blue
           
           // Mix the fire color with the base surface color (can become based on the fire intensity): 
-	  /*if(sink ==3.0){
-            waterColor.b = waterColor.b +0.5;
+	  if(sinkD <0.0){
+            waterColor.b = waterColor.b;
 	    waterColor.g = waterColor.g+0.5;
             waterColor.r = waterColor.r-1.0;
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
-	  }*/
+	  }
+          if(sinkD >0.0){
+            waterColor.b = waterColor.b+0.5;
+            waterColor.g = waterColor.g;
+            waterColor.r = waterColor.r-1.0;
+            //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
+          }
+
 	  if(fireLevel>2.0){
 	    waterColor.r= waterColor.r +1.0;
 	    waterColor.b= waterColor.b + 0.5;
