@@ -83,10 +83,10 @@ void main()
             MINERAL CONTENT NOT IMPLEMENTED
         */
 
-        float tb = 65.0; //burn-out time in seconds
+        float tb = 500.0;//50.0; //burn-out time in seconds
         
-        float wD = 1.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 2.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wD = 0.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
+        float wS = 25.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -167,8 +167,8 @@ void main()
          
 	    // fire = <currentFquantity, burningTime, maxTimestepSize, 0.0>
             float cAngle = deltaDir*i;
-            float dx = 1.0*cos(cAngle);//*pow(sqrt(2.0),modI(iter,2.0));
-            float dy = 1.0*sin(cAngle);//*pow(sqrt(2.0),modI(iter,2.0));
+            float dx = 1.0*cos(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
+            float dy = 1.0*sin(cAngle)*pow(sqrt(2.0),modI(iter,2.0));
             vec4 fire = texture2DRect(fireSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgba;
             vec3 groundState = texture2DRect(surfaceSampler,vec2(gl_FragCoord.x+dx,gl_FragCoord.y+dy)).rgb;
             float spreadAngle = 0.0;
@@ -184,6 +184,7 @@ void main()
               }else{
                 spreadAngle=0.0;
               }
+	      
 	      //Add all wind component wise
 	      float wsX = wS*cos(wD)+groundState.r*cos(groundState.g)+fire.g*cos(fire.a);
               float wsY = wS*sin(wD)+groundState.r*sin(groundState.g)+fire.g*sin(fire.a);
@@ -193,7 +194,7 @@ void main()
               //c_2 = c_1/1.656
               float c1 = 0.006886302;
               float LW = 0.936*exp(c1*wsX)+0.461*exp(-c1/1.656*wsX)-0.397;
-              float EBar =0.8;//sqrt(1.0-pow(LW,-2.0));
+              float EBar =sqrt(1.0-pow(LW,-2.0));
 
 	      float theta = (cAngle+PI)-spreadAngle;  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);

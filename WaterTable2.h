@@ -178,7 +178,8 @@ class WaterTable2:public GLObject
 	GLfloat runSimulationStep(bool forceStepSize,GLContextData& contextData) const; // Runs a water flow simulation step, always uses maxStepSize if flag is true (may lead to instability); returns step size taken by Runge-Kutta integration step
 	void bindBathymetryTexture(GLContextData& contextData) const; // Binds the bathymetry texture object to the active texture unit
 	void bindQuantityTexture(GLContextData& contextData) const; // Binds the most recent conserved quantities texture object to the active texture unit
-	void bindFireTexture(GLContextData& contextData) const; // Binds the most recent fire texture object to the active texture unit
+	void bindFireTexture(GLContextData& contextData) const; //NOWATER  Binds the most recent fire texture object to the active texture unit
+	void bindSurfacePropTexture(GLContextData& contextData) const; //NOWATER Binds the surfaceProp texture
 	void uploadWaterTextureTransform(GLint location) const; // Uploads the water texture transformation into the GLSL 4x4 matrix at the given uniform location
 	GLsizei getBathymetrySize(int index) const // Returns the width or height of the bathymetry grid
 		{

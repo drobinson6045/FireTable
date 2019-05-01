@@ -143,6 +143,7 @@ Water shading function:
 uniform sampler2DRect bathymetrySampler;
 uniform sampler2DRect quantitySampler;
 uniform sampler2DRect fireSampler; //NOWATER
+uniform sampler2DRect surfaceSampler; //NOWATER
 uniform vec2 waterCellSize;
 uniform float waterOpacity;
 uniform float waterAnimationTime;
@@ -160,6 +161,7 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
 	float fireTime = texture2DRect(fireSampler,waterTexCoord).g;
 	float sinkS = texture2DRect(fireSampler,waterTexCoord).b;
 	float sinkD = texture2DRect(fireSampler,waterTexCoord).a;
+	vec3 surf = texture2DRect(surfaceSampler,waterTexCoord).rgb;
 	float opacity = 0.4;
 	float height = texture2DRect(bathymetrySampler,waterTexCoord).r;
 	//bath values from surface float level = 1.17549428075736428990E-38;
@@ -177,6 +179,7 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
           // vec4 waterColor=vec4(0.0,0.0,1.0,1.0); // Blue
           
           // Mix the fire color with the base surface color (can become based on the fire intensity): 
+	  /*
 	  if(sinkD <0.0){
             waterColor.b = waterColor.b;
 	    waterColor.g = waterColor.g+0.5;
@@ -188,6 +191,15 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
             waterColor.g = waterColor.g;
             waterColor.r = waterColor.r-1.0;
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
+          }
+          */
+	  if(surf.g <= 3.14/2.0 && surf.g >= -3.14/2.0){
+	    waterColor.g = waterColor.g + 1.0;
+	    waterColor.r = waterColor.r -1.0;
+	  }
+	  if(surf.g >3.14/2.0 || surf.g <-3.14/2.0){
+            waterColor.b = waterColor.b + 1.0;
+            waterColor.r = waterColor.r -1.0;
           }
 
 	  if(fireLevel>2.0){

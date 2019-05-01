@@ -46,12 +46,12 @@ void main()
     //slopeY = atan(slopeY,1.0);
     
 
-    //using least squares
+    
     float az = atan(slopeY,slopeX);
     //Step in azimuthal direction and get angle
     float dfz =texture2DRect(bathymetrySampler, vec2(gl_FragCoord.x+dx*cos(az),gl_FragCoord.y+dy*sin(az)))-texture2DRect(bathymetrySampler, gl_FragCoord.xy);
     float length = pow(pow(dx*cos(az),2.0)+pow(dy*sin(az),2.0),0.5);
-    float alt = dfz/length;
+    float alt = dfz/length;//tan(theta)
     float elev = texture2DRect(bathymetrySampler, gl_FragCoord.xy).r;
     gl_FragColor=vec4(alt,az,elev,0.0);//(alt,az,elev)
 

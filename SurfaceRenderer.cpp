@@ -479,7 +479,8 @@ GLhandleARB SurfaceRenderer::createSinglePassSurfaceShader(const GLLightTracker&
 			*(ulPtr++)=glGetUniformLocationARB(result,"waterTransform");
 			*(ulPtr++)=glGetUniformLocationARB(result,"bathymetrySampler");
 			*(ulPtr++)=glGetUniformLocationARB(result,"quantitySampler");
-                        *(ulPtr++)=glGetUniformLocationARB(result,"fireSampler");
+                        *(ulPtr++)=glGetUniformLocationARB(result,"fireSampler");//NOWATER
+			*(ulPtr++)=glGetUniformLocationARB(result,"surfaceSampler");//NOWATER
 			*(ulPtr++)=glGetUniformLocationARB(result,"waterCellSize");
 			*(ulPtr++)=glGetUniformLocationARB(result,"waterOpacity");
 			*(ulPtr++)=glGetUniformLocationARB(result,"waterAnimationTime");
@@ -929,6 +930,16 @@ void SurfaceRenderer::renderSinglePass(const int viewport[4],const PTransform& p
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 		glUniform1iARB(*(ulPtr++),5);
 
+		/* Bind the surface texture: NOWATER*/
+                glActiveTextureARB(GL_TEXTURE6_ARB);
+                waterTable->bindSurfacePropTexture(contextData);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+                glUniform1iARB(*(ulPtr++),6);
+
+
 		/* Upload the water grid cell size for normal vector calculation: */
 		glUniformARB<2>(*(ulPtr++),1,waterTable->getCellSize());
 		
@@ -950,7 +961,14 @@ void SurfaceRenderer::renderSinglePass(const int viewport[4],const PTransform& p
 	/* Unbind all textures and buffers: */
 	if(waterTable!=0&&dem==0)
 		{
-		glActiveTextureARB(GL_TEXTURE5_ARB);//NOWATER
+                glActiveTextureARB(GL_TEXTURE6_ARB);//NOWATER surface Prop
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);
+                glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_T,GL_CLAMP);
+                glBindTexture(GL_TEXTURE_RECTANGLE_ARB,0);
+
+		glActiveTextureARB(GL_TEXTURE5_ARB);//NOWATER  fire texture
                 glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_RECTANGLE_ARB,GL_TEXTURE_WRAP_S,GL_CLAMP);

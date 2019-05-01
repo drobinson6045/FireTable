@@ -455,14 +455,16 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	int cX = 150, cY = 250;
 	int rad = 25;
 	begX = 300;
-	endX = 302;
+	endX = 350;
 	begY = 300;
-	endY = 350;
+	endY = 301;
 	for(int i = begX; i<=endX;i++){
 
 		for(int j = begY; j<= endY; j++){
 			//if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
-			  fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			  fb[(i*size[0]+j)*4] = (GLfloat) 1.0;
+			  //fb[(i*size[0]+j)*4+1] = (GLfloat) 1.0;
+
 			//	}
 			}
 		}
@@ -1025,7 +1027,7 @@ GLfloat WaterTable2::runSimulationStep(bool forceStepSize,GLContextData& context
 	********************************************************************
 	*/
 	calcDerivative(dataItem,dataItem->quantityTextureObjects[dataItem->currentQuantity], false);
-	GLfloat stepSize = 4.0;//NOWATER
+	GLfloat stepSize = 1.0;//NOWATER
 	/*********************************************************************
 	Calculate Surface Properties 
 	*********************************************************************/
@@ -1266,14 +1268,23 @@ void WaterTable2::bindBathymetryTexture(GLContextData& contextData) const
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->bathymetryTextureObjects[dataItem->currentBathymetry]);
 	}
 
-void WaterTable2::bindFireTexture(GLContextData& contextData) const
+void WaterTable2::bindFireTexture(GLContextData& contextData) const  //NOWATER
 	{
 	/* Get the data item: */
 	DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 	
-	/* Bind the bathymetry texture: */
+	/* Bind the fire texture: */
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[dataItem->currentFire]);
 	}
+
+void WaterTable2::bindSurfacePropTexture(GLContextData& contextData) const  //NOWATER
+        {
+        /* Get the data item: */
+        DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
+
+        /* Bind the fire texture: */
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->surfacePropTextureObject);
+        }
 
 void WaterTable2::bindQuantityTexture(GLContextData& contextData) const
 	{
