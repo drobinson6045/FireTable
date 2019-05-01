@@ -450,23 +450,23 @@ void WaterTable2::initContext(GLContextData& contextData) const
 	glGenTextures(2,dataItem->fireTextureObjects);
 	GLfloat* fb=makeBuffer(size[0],size[1],4,0.0,0.0,0.0,0.0);
         //NOWATER
-	
-/*	int begX, endX, begY, endY;
+	//Initial Condition
+	int begX, endX, begY, endY;
 	int cX = 150, cY = 250;
 	int rad = 25;
 	begX = 300;
-	endX = 350;
+	endX = 302;
 	begY = 300;
 	endY = 350;
 	for(int i = begX; i<=endX;i++){
 
 		for(int j = begY; j<= endY; j++){
 			//if((i-cX)*(i-cX)+(j-cY)*(j-cY)<= rad*rad){
-				//fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
+			  fb[(i*size[0]+j)*3] = (GLfloat) 1.0;
 			//	}
 			}
 		}
-*/        
+        
     	std::cout<<size[0]<<","<<size[1]<<std::endl;//NOWATER
 	for(int i=0;i<2;++i){
           glBindTexture(GL_TEXTURE_RECTANGLE_ARB,dataItem->fireTextureObjects[i]);

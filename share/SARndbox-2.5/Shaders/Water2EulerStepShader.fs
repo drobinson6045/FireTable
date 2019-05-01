@@ -188,7 +188,11 @@ void main()
 	      float wsX = wS*cos(wD)+groundState.r*cos(groundState.g)+fire.g*cos(fire.a);
               float wsY = wS*sin(wD)+groundState.r*sin(groundState.g)+fire.g*sin(fire.a);
               wsX = sqrt(pow(wsX,2.0)+pow(wsY,2.0));//Wind strength
-              float LW = 0.936*exp(50.5*wsX/1000.0)+0.461*exp(-30.5*wsX/1000.0)-0.397;
+              //c1=0.006886302 c2=0.004154595 for wMax=25 m/s
+              //c1_new = wMax_old/wMax_new*c1_old
+              //c_2 = c_1/1.656
+              float c1 = 0.006886302;
+              float LW = 0.936*exp(c1*wsX)+0.461*exp(-c1/1.656*wsX)-0.397;
               float EBar =0.8;//sqrt(1.0-pow(LW,-2.0));
 
 	      float theta = (cAngle+PI)-spreadAngle;  //simple case average of gradient directionand wind
