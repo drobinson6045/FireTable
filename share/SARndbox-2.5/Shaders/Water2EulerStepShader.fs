@@ -65,7 +65,7 @@ void main()
         //float distances[2] = {cellSize.x,dd};
         float totFire = 0.0;
         float deltaDir = PI/4.0;
-        float convScaling = 1.0;  //scaling parameter to control convective sink strength
+        float convScaling = 0.02;  //scaling parameter to control convective sink strength
         
 
 	/* Input Parameters: 
@@ -83,10 +83,10 @@ void main()
             MINERAL CONTENT NOT IMPLEMENTED
         */
 
-        float tb = 500.0;//50.0; //burn-out time in seconds
+        float tb = 160.0;//50.0; //burn-out time in seconds
         
         float wD = 0.0*PI;//5.0*PI*0.25; //Wind-Direction with respect to x-axis
-        float wS = 25.0; //midFlame Wind-Speed (m/min) might need to be cm/s
+        float wS = 10.0; //midFlame Wind-Speed (m/min) might need to be cm/s
         //in reality is background wind but using as place holder for midflame wind
 
         /*GR4 Fuel Properties
@@ -180,26 +180,27 @@ void main()
               convX += cos(cAngle)*fire.r/dist;
               convY += sin(cAngle)*fire.r/dist;
               if(groundState.r+wS+fire.g!=0.0){//if there is nonzero wind
-                spreadAngle = (4.0*groundState.r*groundState.g+wD*wS+fire.g*fire.a)/(wS+4.0*groundState.r+fire.a);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
+                spreadAngle = (4.0*groundState.r*groundState.g+wD*wS+convScaling*fire.g*fire.a)/(wS+4.0*groundState.r+convScaling*fire.a);//(groundState.g + wD)/2.0; //average of wind direction an gradient direction
               }else{
                 spreadAngle=0.0;
               }
-	      
+	      spreadAngle=(wS*wD+convScaling*fire.g*fire.a)/(wS+convScaling*fire.a);
 	      //Add all wind component wise
-	      float wsX = wS*cos(wD)+groundState.r*cos(groundState.g)+fire.g*cos(fire.a);
-              float wsY = wS*sin(wD)+groundState.r*sin(groundState.g)+fire.g*sin(fire.a);
-              wsX = sqrt(pow(wsX,2.0)+pow(wsY,2.0));//Wind strength
-              //c1=0.006886302 c2=0.004154595 for wMax=25 m/s
+	      float wsX = wS*cos(wD)+groundState.r*cos(groundState.g)+convScaling*fire.g*cos(fire.a);
+              float wsY = wS*sin(wD)+groundState.r*sin(groundState.g)+convScaling*fire.g*sin(fire.a);
+              spreadAngle = atan(wsY,wsX);
+	      wsX = sqrt(pow(wsX,2.0)+pow(wsY,2.0));//Wind strength
+              //c1=0.06421 c2=0.004154595 for wMax=25 m/s
               //c1_new = wMax_old/wMax_new*c1_old
               //c_2 = c_1/1.656
-              float c1 = 0.006886302;
+              float c1 =0.064211;
               float LW = 0.936*exp(c1*wsX)+0.461*exp(-c1/1.656*wsX)-0.397;
               float EBar =sqrt(1.0-pow(LW,-2.0));
 
 	      float theta = (cAngle+PI)-spreadAngle;  //simple case average of gradient directionand wind
               float phiS = 5.275*pow(beta,-0.3)*pow(groundState.r,2.0);
 	      float phiW = C*pow(wsX,B)*pow(beta/betaOp,-E);
-              float eR = R0*(1.0+phiS+phiW);
+              float eR = R0*(1.0+0.0*phiS+phiW);
               float spread = eR*(1.0 - EBar)/(1.0-EBar*cos(theta));
               cont += spread/dist;//fire.r*R0/dist*(0.5*cos(theta+PI)+0.5)*(tan(groundState.r)+1.0);//spread/distances;
               maxtime = dist/spread;//NEED MOD HERE

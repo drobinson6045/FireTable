@@ -193,11 +193,23 @@ void addWaterColor(in vec2 fragCoord,inout vec4 baseColor)
             //vec4 waterColor=vec4(0.2,0.2,0.2,1.0);
           }
           */
+	  /*	
+	  //For coloring surface gradient direction
 	  if(surf.g <= 3.14/2.0 && surf.g >= -3.14/2.0){
 	    waterColor.g = waterColor.g + 1.0;
 	    waterColor.r = waterColor.r -1.0;
 	  }
 	  if(surf.g >3.14/2.0 || surf.g <-3.14/2.0){
+            waterColor.b = waterColor.b + 1.0;
+            waterColor.r = waterColor.r -1.0;
+          }
+	  */
+	  //For coloring based on tan(theta) of surface
+          if(surf.r >= 0.2){
+            waterColor.g = waterColor.g + 1.0;
+            waterColor.r = waterColor.r -1.0;
+          }
+          if(surf.r<0.2){
             waterColor.b = waterColor.b + 1.0;
             waterColor.r = waterColor.r -1.0;
           }
